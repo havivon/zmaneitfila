@@ -261,6 +261,11 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .inp-time{width:86px;flex:0 0 auto;text-align:center;font-weight:700;color:var(--gold-soft);letter-spacing:.5px}
 .note-inp{margin-top:6px;font-size:12.5px!important;padding:6px 9px!important}
 .item-tools{display:flex;gap:3px;flex:0 0 auto}
+/* במסך צר כפתורי השורה יורדים לשורה משלהם, אחרת שדה שם התפילה נמעך */
+@media(max-width:620px){
+  .item{grid-template-columns:auto 1fr;row-gap:7px}
+  .item-tools{grid-column:1 / -1;justify-content:flex-end}
+}
 .icon-btn{width:28px;height:28px;border-radius:9px;border:1px solid transparent;background:rgba(255,255,255,.05);
   color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:.16s;padding:0}
 .icon-btn:hover{background:rgba(255,255,255,.13);color:var(--txt)}
@@ -471,7 +476,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                                maxlength="24" placeholder="בצאת השבת">
                         <input class="inp" x-model="it.label" placeholder="שם התפילה">
                       </div>
-                      <input class="inp note-inp" x-model="it.note" placeholder="הערה (לא חובה) — למשל: בעזרת הנשים / באולם הקטן">
+                      <input class="inp note-inp" x-model="it.note" placeholder="הערה (לא חובה) — למשל: בעזרת הנשים">
                     </div>
                     <div class="item-tools">
                       <button class="icon-btn" @click="it.freeText=!it.freeText" :title="it.freeText?'מעבר לשעה':'טקסט חופשי'"
