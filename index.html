@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>לוח זמני תפילות יחזקאל</title>
-<meta name="description" content="מערכת ניהול ועיצוב לוח זמני תפילות לבית כנסת יחזקאל ע\"ש הבן איש חי זיע\"א — עריכה, בחירת תפילות ושיתוף כתמונה בוואטסאפ">
+<meta name="description" content="ניהול ועיצוב לוח זמני התפילות של בית כנסת יחזקאל — עריכת זמנים, בחירת תפילות ושיתוף כתמונה בוואטסאפ">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -803,10 +803,9 @@ document.addEventListener('alpine:init', () => {
       this.d = defaults();
       this.toast('הלוח אופס');
     },
-    exportJson(){
+    async exportJson(){
       const blob = new Blob([JSON.stringify(this.d,null,2)], {type:'application/json'});
-      this.saveBlob(blob, 'zmanei-tfila-backup.json');
-      this.toast('קובץ הגיבוי ירד');
+      if (await this.saveBlob(blob, 'zmanei-tfila-backup.json')) this.toast('קובץ הגיבוי נשמר');
     },
     importJson(e){
       const f = e.target.files && e.target.files[0];
@@ -847,12 +846,20 @@ document.addEventListener('alpine:init', () => {
       const p = (this.d.parasha||'').trim().replace(/[\\/:*?"<>|]/g,'');
       return 'זמני-תפילה' + (p ? '-' + p.replace(/\s+/g,'-') : '') + '.png';
     },
-    saveBlob(blob, name){
+    /* בעמוד המתארח בקלוד ההורדה עוברת דרך אישור הצופה; בכל דפדפן רגיל — הורדה ישירה */
+    async saveBlob(blob, name){
+      try {
+        const dl = (window.claude && window.claude.use) ? await window.claude.use('downloads') : null;
+        if (dl){ await dl.save({ filename:name, data:blob }); return true; }
+      } catch(err){
+        if (err && (err.code === 'declined' || err.code === 'rate_limited')) return false;
+      }
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = name;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=>URL.revokeObjectURL(url), 4000);
+      return true;
     },
     shareText(){
       const parts = [this.d.synagogue];
@@ -881,8 +888,7 @@ document.addEventListener('alpine:init', () => {
     async downloadImage(){
       const blob = await this.currentBlob();
       if (!blob) { this.toast('שגיאה ביצירת התמונה'); return; }
-      this.saveBlob(blob, this.fileName());
-      this.toast('התמונה ירדה למכשיר');
+      if (await this.saveBlob(blob, this.fileName())) this.toast('התמונה נשמרה במכשיר');
     },
     async copyImage(){
       try {
@@ -908,10 +914,10 @@ document.addEventListener('alpine:init', () => {
           if (err && err.name === 'AbortError') return;
         }
       }
-      this.saveBlob(blob, this.fileName());
+      await this.saveBlob(blob, this.fileName());
       this.closePreview();
       window.open('https://web.whatsapp.com/', '_blank', 'noopener');
-      this.toast('התמונה ירדה — צרפו אותה לקבוצה בוואטסאפ');
+      this.toast('התמונה נשמרה — צרפו אותה לקבוצה בוואטסאפ');
     },
     doPrint(){ window.print(); },
     toast(msg){
