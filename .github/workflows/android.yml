@@ -1,0 +1,55 @@
+name: בניית אפליקציית אנדרואיד
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'android/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: הכנת נכסי האפליקציה מתוך העמוד
+        run: ./android/prepare-assets.sh
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: בניית ה‑APK
+        working-directory: android
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: העתקה בשם קריא
+        run: cp android/app/build/outputs/apk/release/app-release.apk zmanei-tfila-yechezkel.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zmanei-tfila-apk
+          path: zmanei-tfila-yechezkel.apk
+
+      - name: פרסום השחרור
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v1.0.${{ github.run_number }}"
+          gh release create "$TAG" zmanei-tfila-yechezkel.apk \
+            --title "לוח זמני תפילות — בית כנסת יחזקאל $TAG" \
+            --notes "אפליקציית אנדרואיד לניהול לוח זמני התפילות ושיתופו כתמונה.
+
+          להתקנה: להוריד את הקובץ בטלפון, ולאשר התקנה ממקור לא מוכר.
+          האפליקציה עובדת גם בלי חיבור לאינטרנט ואינה מבקשת שום הרשאה."
