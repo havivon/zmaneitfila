@@ -32,7 +32,10 @@ jobs:
 
       - name: בניית ה‑APK
         working-directory: android
-        run: gradle assembleRelease --no-daemon --stacktrace
+        run: |
+          gradle assembleRelease --no-daemon --stacktrace \
+            -PappVersionCode=${{ github.run_number }} \
+            -PappVersionName=1.0.${{ github.run_number }}
 
       - name: העתקה בשם קריא
         run: cp android/app/build/outputs/apk/release/app-release.apk zmanei-tfila-yechezkel.apk

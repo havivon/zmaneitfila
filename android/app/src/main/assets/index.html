@@ -604,7 +604,10 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
             <button class="btn btn-sm btn-ghost btn-danger" @click="resetAll()">איפוס לברירת מחדל</button>
           </div>
           <div class="hint" style="margin-top:14px">
-            כל הנתונים נשמרים בדפדפן של מנהל בית הכנסת בלבד. לשיתוף הלוח עם הגבאים — השתמשו בגיבוי לקובץ.
+            כל הנתונים נשמרים במכשיר של מנהל בית הכנסת בלבד. לשיתוף הלוח עם הגבאים — השתמשו בגיבוי לקובץ.
+            <span x-show="appVersion" style="display:block;margin-top:6px;color:var(--gold-soft)">
+              גרסת האפליקציה: <span x-text="appVersion"></span>
+            </span>
           </div>
         </div>
 
@@ -944,6 +947,7 @@ document.addEventListener('alpine:init', () => {
     previewUrl:'',
     previewBlob:null,
     tp:{ open:false, item:null, h:18, m:0 },
+    appVersion:'',
     parashot:PARASHOT,
     shabbatot:SHABBATOT,
     quickAdd:[
@@ -973,6 +977,7 @@ document.addEventListener('alpine:init', () => {
       });
       this.$nextTick(()=>this.fit());
       window.addEventListener('resize', ()=>this.fit());
+      if (NATIVE && NATIVE.appVersion) this.appVersion = NATIVE.appVersion();
       /* מקש החזרה של אנדרואיד: סוגר קודם חלון פתוח */
       window.__closeTopLayer = () => {
         if (this.tp.open){ this.tp.open = false; return true; }

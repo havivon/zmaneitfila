@@ -3,6 +3,7 @@ package com.zmaneitfila.yechezkel;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -12,6 +13,7 @@ import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
+import androidx.core.content.pm.PackageInfoCompat;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -82,6 +84,17 @@ public class AppBridge {
                 toast("לא הצלחתי לשתף את הקובץ");
             }
         });
+    }
+
+    /** גרסת האפליקציה המותקנת, להצגה בפאנל הניהול. */
+    @JavascriptInterface
+    public String appVersion() {
+        try {
+            PackageInfo info = act.getPackageManager().getPackageInfo(act.getPackageName(), 0);
+            return info.versionName + " (" + PackageInfoCompat.getLongVersionCode(info) + ")";
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     private static byte[] decode(String dataUrl) {

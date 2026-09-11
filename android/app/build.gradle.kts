@@ -8,14 +8,29 @@ android {
         applicationId = "com.zmaneitfila.yechezkel"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        // מספר הגרסה עולה בכל בנייה, כדי שאנדרואיד יזהה עדכון
+        versionCode = (project.findProperty("appVersionCode") as String?)?.toInt() ?: 1
+        versionName = (project.findProperty("appVersionName") as String?) ?: "1.0"
     }
+
+    signingConfigs {
+        // מפתח חתימה קבוע ששמור במאגר: בלי זה כל בנייה נחתמת במפתח אחר,
+        // ואנדרואיד מסרב להתקין עדכון על גרסה שנחתמה במפתח שונה.
+        create("shared") {
+            storeFile = rootProject.file("keystore/zmanei-tfila.jks")
+            storePassword = "zmanei-tfila"
+            keyAlias = "zmanei-tfila"
+            keyPassword = "zmanei-tfila"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
-            // חתימה בחתימת ה‑debug כדי שאפשר יהיה להתקין ישירות מהטלפון
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("shared")
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("shared")
         }
     }
     compileOptions {
