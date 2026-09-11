@@ -37,20 +37,20 @@ jobs:
             -PappVersionCode=${{ github.run_number }} \
             -PappVersionName=1.0.${{ github.run_number }}
 
-      - name: העתקה בשם קריא
-        run: cp android/app/build/outputs/apk/release/app-release.apk zmanei-tfila-yechezkel.apk
+      - name: העתקה בשם הכולל את מספר הגרסה
+        run: cp android/app/build/outputs/apk/release/app-release.apk zmanei-tfila-1.0.${{ github.run_number }}.apk
 
       - uses: actions/upload-artifact@v4
         with:
           name: zmanei-tfila-apk
-          path: zmanei-tfila-yechezkel.apk
+          path: zmanei-tfila-1.0.${{ github.run_number }}.apk
 
       - name: פרסום השחרור
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="v1.0.${{ github.run_number }}"
-          gh release create "$TAG" zmanei-tfila-yechezkel.apk \
+          TAG="1.0.${{ github.run_number }}"
+          gh release create "$TAG" "zmanei-tfila-$TAG.apk" \
             --title "לוח זמני תפילות — בית כנסת יחזקאל $TAG" \
             --notes "אפליקציית אנדרואיד לניהול לוח זמני התפילות ושיתופו כתמונה.
 

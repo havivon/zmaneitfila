@@ -21,6 +21,10 @@ android {
             storePassword = "zmanei-tfila"
             keyAlias = "zmanei-tfila"
             keyPassword = "zmanei-tfila"
+            // כל סכימות החתימה, כדי שגם מתקין חבילות ותיק יזהה את החתימה
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
 
