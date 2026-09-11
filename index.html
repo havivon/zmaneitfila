@@ -531,10 +531,10 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
             <input class="inp" x-model="d.parasha" placeholder="פרשת בראשית">
           </div>
           <div class="field">
-            <label>תאריך עברי</label>
+            <label>תאריך עברי ופרשה — עדכון אוטומטי</label>
             <div style="display:flex;gap:8px">
               <input class="inp" x-model="d.hdate" placeholder='כ״ה בתשרי תשפ״ז'>
-              <button class="btn btn-sm" style="flex:0 0 auto" @click="fillShabbatDate()">שבת הקרובה</button>
+              <button class="btn btn-sm" style="flex:0 0 auto" @click="fillShabbatDate()">עדכן לשבת הקרובה</button>
             </div>
           </div>
           <div class="field"><label>שורת מידע נוספת (כניסת שבת וכד')</label>
@@ -705,12 +705,21 @@ function hebNumber(n){
   const g = gematria(n);
   return g.length === 1 ? g + '׳' : g.slice(0,-1) + '״' + g.slice(-1);
 }
-/* התאריך העברי מגיע מלוח השנה המובנה בדפדפן; רק הספרות מומרות לאותיות */
+/* ====== לוח השנה העברי ======
+   התאריכים מגיעים מלוח השנה המובנה בדפדפן (Intl), ללא חיבור לרשת.
+   כל החישובים נעשים על חצות UTC כדי שאזור הזמן של המכשיר לא יזיז יום. */
+const MS = 86400000;
+const HFMT = new Intl.DateTimeFormat('he-u-ca-hebrew',
+  { day:'numeric', month:'long', year:'numeric', timeZone:'UTC' });
+const utcNoon = (d) => new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12));
+function hParts(d){
+  const o = {};
+  for (const x of HFMT.formatToParts(d)) if (x.type !== 'literal') o[x.type] = x.value;
+  return { d:+o.day, m:o.month, y:+o.year };
+}
 function hebrewDate(date){
   try {
-    const parts = new Intl.DateTimeFormat('he-u-ca-hebrew',
-      { day:'numeric', month:'long', year:'numeric' }).formatToParts(date);
-    return parts.map(p => {
+    return HFMT.formatToParts(utcNoon(date)).map(p => {
       if (p.type === 'day')  return hebNumber(parseInt(p.value,10));
       if (p.type === 'year') return hebNumber(parseInt(p.value,10) % 1000);
       return p.value;
@@ -719,18 +728,129 @@ function hebrewDate(date){
 }
 function comingShabbat(){
   const d = new Date();
-  d.setHours(12,0,0,0);
-  d.setDate(d.getDate() + ((6 - d.getDay()) + 7) % 7);   /* שבת הקרובה, וכולל היום אם היום שבת */
-  return d;
+  d.setDate(d.getDate() + ((6 - d.getDay()) + 7) % 7);   /* השבת הקרובה, וכולל היום אם היום שבת */
+  return utcNoon(d);
+}
+
+/* ====== סדר קריאת הפרשות (מנהג ארץ ישראל) ======
+   מחושב מן הלוח: שבתות המועדים יוצאות מן המניין, ומספר החיבורים נקבע ממספר
+   השבתות שנותרו. מבין הצירופים האפשריים נבחר זה שעומד בעוגני הלוח —
+   "מנו ועצרו" (במדבר לפני שבועות) ושבת הגדול בפרשת צו בשנה פשוטה. */
+const PAR = ['בראשית','נח','לך לך','וירא','חיי שרה','תולדות','ויצא','וישלח','וישב','מקץ','ויגש','ויחי',
+ 'שמות','וארא','בא','בשלח','יתרו','משפטים','תרומה','תצוה','כי תשא','ויקהל','פקודי','ויקרא','צו','שמיני',
+ 'תזריע','מצורע','אחרי מות','קדושים','אמור','בהר','בחוקותי','במדבר','נשא','בהעלותך','שלח לך','קרח','חקת',
+ 'בלק','פינחס','מטות','מסעי','דברים','ואתחנן','עקב','ראה','שופטים','כי תצא','כי תבוא','נצבים','וילך'];
+const SECOND = {'ויקהל':'פקודי','תזריע':'מצורע','אחרי מות':'קדושים','בהר':'בחוקותי','חקת':'בלק','מטות':'מסעי'};
+/* סדר העדפה לחיבור: מטות־מסעי לפני חקת־בלק (שאינו נהוג בארץ),
+   ובין פסח לשבועות — תזריע, אחרי מות ואז בהר */
+const PAIR_W = {'ויקהל':64,'תזריע':32,'אחרי מות':16,'בהר':8,'מטות':4,'חקת':1};
+const PAIR_KEYS = Object.keys(PAIR_W);
+const MORDER = ['תשרי','חשוון','כסלו','טבת','שבט','אדר','אדר א׳','אדר ב׳','ניסן','אייר','סיוון','תמוז','אב','אלול'];
+const cmpH = (a,b) => (a.y-b.y) || (MORDER.indexOf(a.m)-MORDER.indexOf(b.m)) || (a.d-b.d);
+
+const _gregCache = new Map();
+function toGreg(hy, hm, hd){                       /* תאריך עברי → לועזי, בחיפוש בינארי */
+  const key = hy+'/'+hm+'/'+hd;
+  if (_gregCache.has(key)) return _gregCache.get(key);
+  const target = { y:hy, m:hm, d:hd };
+  let lo = Math.floor(Date.UTC(hy-3763,0,1)/MS), hi = Math.floor(Date.UTC(hy-3759,11,31)/MS), found = null;
+  while (lo <= hi){
+    const mid = (lo + hi) >> 1;
+    const g = new Date(mid*MS + 12*3600*1000);
+    const c = cmpH(hParts(g), target);
+    if (c === 0){ found = g; break; }
+    if (c < 0) lo = mid + 1; else hi = mid - 1;
+  }
+  _gregCache.set(key, found);
+  return found;
+}
+
+const _schedCache = new Map();
+function yearSchedule(hy){
+  if (_schedCache.has(hy)) return _schedCache.get(hy);
+  const rh = toGreg(hy,'תשרי',1), rhNext = toGreg(hy+1,'תשרי',1), simchat = toGreg(hy,'תשרי',22);
+  const pesach = toGreg(hy,'ניסן',15), shavuot = toGreg(hy,'סיוון',6);
+  if (!rh || !rhNext || !simchat || !pesach || !shavuot) return null;
+
+  const slots = [];
+  for (let t = +simchat + MS; t < +rhNext; t += MS){
+    const g = new Date(t);
+    if (g.getUTCDay() !== 6) continue;
+    const h = hParts(g);
+    if ((h.m==='ניסן' && h.d>=15 && h.d<=21) || (h.m==='סיוון' && h.d===6)) continue;  /* שבתות המועדים */
+    slots.push(g);
+  }
+  const N = slots.length, need = 51 - N;
+  const leap = Math.round((rhNext - rh)/MS) >= 383;
+  const pairNitzavim = [4,6].includes(rhNext.getUTCDay());   /* ר"ה בחמישי או בשבת → נצבים־וילך */
+
+  const buildSeq = (set) => {
+    const seq = [];
+    for (let i=0; i<PAR.length-1; i++){
+      const n = PAR[i];
+      if (n === 'נצבים'){ seq.push(pairNitzavim ? 'נצבים־וילך' : 'נצבים'); break; }
+      if (set.has(n)){ seq.push(n + '־' + SECOND[n]); i++; } else seq.push(n);
+    }
+    return seq;
+  };
+  const subsets = [];
+  (function pick(i, cur){
+    if (cur.length === need){ subsets.push([...cur]); return; }
+    if (i >= PAIR_KEYS.length || cur.length > need) return;
+    pick(i+1, [...cur, PAIR_KEYS[i]]); pick(i+1, cur);
+  })(0, []);
+
+  const readAt = (seq, cond) => { let k = -1; for (let i=0;i<slots.length;i++) if (cond(slots[i])) k = i; return seq[k]; };
+  let cands = subsets.map(set => {
+    const S = new Set(set), seq = buildSeq(S);
+    return { set:S, seq, hagadol: readAt(seq, g => g < pesach), preShav: readAt(seq, g => g < shavuot),
+             w: set.reduce((a,x)=>a+PAIR_W[x], 0) };
+  }).filter(c => c.seq.length === N);
+
+  const narrow = (f) => { const r = cands.filter(f); if (r.length) cands = r; };
+  narrow(c => c.preShav === 'במדבר');
+  if (!leap) narrow(c => c.hagadol === 'צו');
+  cands.sort((a,b) => b.w - a.w);
+
+  const res = { slots, seq: cands[0] ? cands[0].seq : buildSeq(new Set()) };
+  _schedCache.set(hy, res);
+  return res;
+}
+
+/* הקריאה של שבת מסוימת — פרשה, או שם המועד כשהשבת חלה בחג */
+function parashaFor(date){
+  try {
+    const sat = utcNoon(date);
+    const h = hParts(sat);
+    if (h.m === 'תשרי'){
+      if (h.d === 1 || h.d === 2) return 'ראש השנה';
+      if (h.d === 10) return 'יום הכיפורים';
+      if (h.d === 15) return 'סוכות';
+      if (h.d >= 16 && h.d <= 21) return 'שבת חול המועד סוכות';
+      if (h.d === 22) return 'שמחת תורה';
+      if (h.d < 15){
+        const rh = toGreg(h.y,'תשרי',1);                 /* ר"ה בשני או בשלישי → שתי שבתות */
+        return (rh && [1,2].includes(rh.getUTCDay()) && h.d < 10) ? 'וילך' : 'האזינו';
+      }
+    }
+    if (h.m === 'ניסן' && h.d >= 15 && h.d <= 21)
+      return h.d === 15 ? 'פסח' : (h.d === 21 ? 'שביעי של פסח' : 'שבת חול המועד פסח');
+    if (h.m === 'סיוון' && h.d === 6) return 'שבועות';
+    const sch = yearSchedule((h.m === 'תשרי' && h.d <= 22) ? h.y - 1 : h.y);
+    if (!sch) return null;
+    const i = sch.slots.findIndex(g => +g === +sat);
+    return i >= 0 ? sch.seq[i] : null;
+  } catch(e){ return null; }
 }
 
 /* ---- רשימת הפרשות והשבתות המיוחדות לבחירה מהירה ---- */
-const PARASHOT = ['בראשית','נח','לך לך','וירא','חיי שרה','תולדות','ויצא','וישלח','וישב','מקץ','ויגש','ויחי',
- 'שמות','וארא','בא','בשלח','יתרו','משפטים','תרומה','תצוה','כי תשא','ויקהל','פקודי','ויקהל־פקודי',
- 'ויקרא','צו','שמיני','תזריע','מצורע','תזריע־מצורע','אחרי מות','קדושים','אחרי מות־קדושים','אמור',
- 'בהר','בחוקותי','בהר־בחוקותי','במדבר','נשא','בהעלותך','שלח לך','קרח','חקת','בלק','חקת־בלק','פינחס',
- 'מטות','מסעי','מטות־מסעי','דברים','ואתחנן','עקב','ראה','שופטים','כי תצא','כי תבוא','נצבים','וילך',
- 'נצבים־וילך','האזינו','וזאת הברכה'];
+const PARASHOT = (() => {
+  const first = {}; for (const k in SECOND) first[SECOND[k]] = k;
+  const out = [];
+  for (const n of PAR){ out.push(n); if (first[n]) out.push(first[n] + '־' + n); }
+  out.push('וזאת הברכה');
+  return out;
+})();
 const SHABBATOT = ['שבת שובה','שבת חול המועד סוכות','שמחת תורה','שבת חנוכה','שבת שקלים','שבת זכור',
  'שבת פרה','שבת החודש','שבת הגדול','שבת חול המועד פסח','שבת ראש חודש','ראש השנה','יום הכיפורים',
  'סוכות','שמיני עצרת','פסח','שביעי של פסח','שבועות'];
@@ -829,7 +949,11 @@ document.addEventListener('alpine:init', () => {
     /* ---------- אתחול ---------- */
     init(){
       this.load();
-      if (!this.d.hdate) this.d.hdate = hebrewDate(comingShabbat());
+      if (!this.d.hdate || !this.d.parasha || this.d.parasha === 'פרשת השבוע'){
+        const f = this.shabbatFields();
+        if (!this.d.hdate && f.date) this.d.hdate = f.date;
+        if ((!this.d.parasha || this.d.parasha === 'פרשת השבוע') && f.parasha) this.d.parasha = f.parasha;
+      }
       this.applyTheme();
       this.$watch('d', () => {
         this.save(); this.applyTheme(); this.$nextTick(()=>this.fit());
@@ -869,10 +993,19 @@ document.addEventListener('alpine:init', () => {
     },
 
     /* ---------- תאריך עברי ופרשה ---------- */
+    /* ממלא תאריך עברי ופרשה לשבת הקרובה */
+    shabbatFields(){
+      const sat = comingShabbat();
+      const date = hebrewDate(sat);
+      const par = parashaFor(sat);
+      return { date, parasha: par ? (PAR.includes(par) || par.includes('־') ? 'פרשת ' + par : par) : '' };
+    },
     fillShabbatDate(){
-      const d = hebrewDate(comingShabbat());
-      if (d){ this.d.hdate = d; this.toast('התאריך עודכן לשבת הקרובה'); }
-      else this.toast('הדפדפן אינו תומך בלוח השנה העברי');
+      const f = this.shabbatFields();
+      if (!f.date){ this.toast('הדפדפן אינו תומך בלוח השנה העברי'); return; }
+      this.d.hdate = f.date;
+      if (f.parasha) this.d.parasha = f.parasha;
+      this.toast('עודכן לשבת הקרובה' + (f.parasha ? ' — ' + f.parasha : ''));
     },
     pickParasha(e){
       const v = e.target.value;
