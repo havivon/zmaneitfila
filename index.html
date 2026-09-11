@@ -183,6 +183,25 @@ button{font-family:inherit}
 .p-ded{margin-top:9px;font-size:13.5px;color:var(--p-txt-soft);font-weight:300;line-height:1.6}
 .p-addr{margin-top:9px;font-size:14px;color:var(--p-gold);font-weight:400;letter-spacing:.4px}
 
+/* ============ בורר שעות ============ */
+.tp-card{max-width:min(420px,95vw)}
+.tp-display{font-family:'Frank Ruhl Libre',serif;font-size:46px;font-weight:900;color:var(--gold-soft);
+  text-align:center;letter-spacing:2px;padding:6px 0 2px;font-variant-numeric:tabular-nums}
+.tp-nudge{display:flex;gap:6px;justify-content:center}
+.tp-nudge button{flex:1;padding:9px 0;font-size:13px;font-weight:700;border-radius:10px;
+  border:1px solid var(--line-soft);background:rgba(255,255,255,.05);color:var(--txt);cursor:pointer;transition:.16s}
+.tp-nudge button:hover{background:rgba(232,196,106,.16);border-color:rgba(232,196,106,.4)}
+.tp-sect{font-size:12px;color:var(--muted);font-weight:700;margin:6px 0 -4px}
+.tp-grid{display:grid;gap:5px}
+.tp-hours{grid-template-columns:repeat(6,1fr)}
+.tp-mins{grid-template-columns:repeat(6,1fr)}
+.tp-btn{padding:10px 0;border-radius:9px;border:1px solid transparent;background:rgba(255,255,255,.05);
+  color:var(--txt);font-size:14px;font-weight:600;cursor:pointer;transition:.14s;font-variant-numeric:tabular-nums}
+.tp-btn:hover{background:rgba(255,255,255,.12)}
+.tp-btn.on{background:linear-gradient(145deg,#f0d183,#c99a2e);color:#1c1406;font-weight:800}
+button.inp-time{cursor:pointer;text-align:center;display:block}
+button.inp-time:hover{border-color:rgba(232,196,106,.5);background:rgba(232,196,106,.1)}
+
 /* ============ חלון תצוגה מקדימה ============ */
 .modal{position:fixed;inset:0;z-index:96;background:rgba(4,7,15,.88);display:flex;align-items:center;
   justify-content:center;padding:16px}
@@ -389,7 +408,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                 <div class="p-foot">
                   <div class="p-blessing" x-show="d.blessing.trim()" x-text="d.blessing"></div>
                   <div class="p-ded" x-show="d.dedication.trim()" x-text="d.dedication"></div>
-                  <div class="p-addr" x-show="d.address.trim()" x-text="d.address"></div>
+                  <div class="p-addr" x-show="d.showAddress && d.address.trim()" x-text="d.address"></div>
                 </div>
               </div>
             </div>
@@ -438,9 +457,10 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                     <label class="sw"><input type="checkbox" x-model="it.enabled"><i></i></label>
                     <div class="item-main">
                       <div class="item-line">
-                        <input class="inp inp-time" type="text" x-model="it.time" @blur="normalizeTime(it)"
-                               :inputmode="it.freeText ? 'text' : 'numeric'" maxlength="24"
-                               :placeholder="it.freeText ? 'בצאת השבת' : '18:20'">
+                        <button class="inp inp-time" x-show="!it.freeText" @click="openTime(it)"
+                                x-text="it.time || '--:--'" title="בחירת שעה"></button>
+                        <input class="inp inp-time" x-show="it.freeText" x-model="it.time"
+                               maxlength="24" placeholder="בצאת השבת">
                         <input class="inp" x-model="it.label" placeholder="שם התפילה">
                       </div>
                       <input class="inp note-inp" x-model="it.note" placeholder="הערה (לא חובה) — למשל: בעזרת הנשים / באולם הקטן">
@@ -488,13 +508,34 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
             <input class="inp" x-model="d.subtitle" placeholder="לוח זמני התפילות"></div>
           <div class="field"><label>כתובת בית הכנסת</label>
             <input class="inp" x-model="d.address" placeholder="רח' הרב עוזיאל 12, רמת גן"></div>
+          <div class="field" style="display:flex;align-items:center;gap:10px">
+            <label class="sw" style="margin:0"><input type="checkbox" x-model="d.showAddress"><i></i></label>
+            <span style="font-size:14px">הצג את הכתובת בתחתית הלוח</span>
+          </div>
 
           <div class="sect-title">פרשה ותאריך</div>
-          <div class="row2">
-            <div class="field"><label>פרשת השבוע</label>
-              <input class="inp" x-model="d.parasha" placeholder="פרשת בראשית"></div>
-            <div class="field"><label>תאריך עברי</label>
-              <input class="inp" x-model="d.hdate" placeholder='כ"ה תשרי תשפ"ז'></div>
+          <div class="field">
+            <label>פרשת השבוע — בחירה מהירה</label>
+            <select class="inp" @change="pickParasha($event)">
+              <option value="">בחר פרשה או שבת מיוחדת…</option>
+              <optgroup label="פרשות השבוע">
+                <template x-for="p in parashot" :key="p"><option :value="p" x-text="'פרשת ' + p"></option></template>
+              </optgroup>
+              <optgroup label="שבתות ומועדים">
+                <template x-for="h in shabbatot" :key="h"><option :value="h" x-text="h"></option></template>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field">
+            <label>הכיתוב שיופיע בלוח</label>
+            <input class="inp" x-model="d.parasha" placeholder="פרשת בראשית">
+          </div>
+          <div class="field">
+            <label>תאריך עברי</label>
+            <div style="display:flex;gap:8px">
+              <input class="inp" x-model="d.hdate" placeholder='כ״ה בתשרי תשפ״ז'>
+              <button class="btn btn-sm" style="flex:0 0 auto" @click="fillShabbatDate()">שבת הקרובה</button>
+            </div>
           </div>
           <div class="field"><label>שורת מידע נוספת (כניסת שבת וכד')</label>
             <input class="inp" x-model="d.extraMeta" placeholder="כניסת השבת 18:05 · צאת השבת 19:05"></div>
@@ -567,6 +608,44 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
   </div>
 </div>
 
+<div class="modal" x-show="tp.open" x-transition.opacity @keydown.escape.window="tp.open=false">
+  <div class="modal-card tp-card" @click.outside="tp.open=false">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">בחירת שעה</div>
+        <div class="modal-sub" x-text="tp.item ? tp.item.label : ''"></div>
+      </div>
+      <button class="icon-btn" style="margin-inline-start:auto" @click="tp.open=false" title="סגירה">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="tp-display" x-text="pad(tp.h) + ':' + pad(tp.m)"></div>
+    <div class="tp-nudge">
+      <button @click="nudge(-15)">15 −</button>
+      <button @click="nudge(-5)">5 −</button>
+      <button @click="nudge(-1)">1 −</button>
+      <button @click="nudge(1)">1 +</button>
+      <button @click="nudge(5)">5 +</button>
+      <button @click="nudge(15)">15 +</button>
+    </div>
+    <div class="tp-sect">שעה</div>
+    <div class="tp-grid tp-hours">
+      <template x-for="h in 24" :key="h">
+        <button class="tp-btn" :class="tp.h===h-1 && 'on'" @click="setTime(h-1, tp.m)" x-text="pad(h-1)"></button>
+      </template>
+    </div>
+    <div class="tp-sect">דקות</div>
+    <div class="tp-grid tp-mins">
+      <template x-for="m in minuteSteps" :key="m">
+        <button class="tp-btn" :class="tp.m===m && 'on'" @click="setTime(tp.h, m)" x-text="pad(m)"></button>
+      </template>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" style="flex:1" @click="tp.open=false">אישור</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" x-show="showPreview" x-transition.opacity @keydown.escape.window="closePreview()">
   <div class="modal-card" @click.outside="closePreview()">
     <div class="modal-head">
@@ -610,6 +689,52 @@ const PORTRAIT = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1B
 
 const STORE = 'zmanei-tfila-yechezkel-v2';
 
+/* ---- מספרים בגימטריה, לתאריך העברי ---- */
+const GEMATRIA = [[400,'ת'],[300,'ש'],[200,'ר'],[100,'ק'],[90,'צ'],[80,'פ'],[70,'ע'],[60,'ס'],[50,'נ'],
+                  [40,'מ'],[30,'ל'],[20,'כ'],[10,'י'],[9,'ט'],[8,'ח'],[7,'ז'],[6,'ו'],[5,'ה'],[4,'ד'],[3,'ג'],[2,'ב'],[1,'א']];
+function gematria(n){
+  let out = '', rest = n;
+  for (const [v,l] of GEMATRIA){
+    if (rest === 15){ out += 'טו'; rest = 0; break; }
+    if (rest === 16){ out += 'טז'; rest = 0; break; }
+    while (rest >= v){ out += l; rest -= v; }
+  }
+  return out;
+}
+function hebNumber(n){
+  const g = gematria(n);
+  return g.length === 1 ? g + '׳' : g.slice(0,-1) + '״' + g.slice(-1);
+}
+/* התאריך העברי מגיע מלוח השנה המובנה בדפדפן; רק הספרות מומרות לאותיות */
+function hebrewDate(date){
+  try {
+    const parts = new Intl.DateTimeFormat('he-u-ca-hebrew',
+      { day:'numeric', month:'long', year:'numeric' }).formatToParts(date);
+    return parts.map(p => {
+      if (p.type === 'day')  return hebNumber(parseInt(p.value,10));
+      if (p.type === 'year') return hebNumber(parseInt(p.value,10) % 1000);
+      return p.value;
+    }).join('');
+  } catch(e){ return ''; }
+}
+function comingShabbat(){
+  const d = new Date();
+  d.setHours(12,0,0,0);
+  d.setDate(d.getDate() + ((6 - d.getDay()) + 7) % 7);   /* שבת הקרובה, וכולל היום אם היום שבת */
+  return d;
+}
+
+/* ---- רשימת הפרשות והשבתות המיוחדות לבחירה מהירה ---- */
+const PARASHOT = ['בראשית','נח','לך לך','וירא','חיי שרה','תולדות','ויצא','וישלח','וישב','מקץ','ויגש','ויחי',
+ 'שמות','וארא','בא','בשלח','יתרו','משפטים','תרומה','תצוה','כי תשא','ויקהל','פקודי','ויקהל־פקודי',
+ 'ויקרא','צו','שמיני','תזריע','מצורע','תזריע־מצורע','אחרי מות','קדושים','אחרי מות־קדושים','אמור',
+ 'בהר','בחוקותי','בהר־בחוקותי','במדבר','נשא','בהעלותך','שלח לך','קרח','חקת','בלק','חקת־בלק','פינחס',
+ 'מטות','מסעי','מטות־מסעי','דברים','ואתחנן','עקב','ראה','שופטים','כי תצא','כי תבוא','נצבים','וילך',
+ 'נצבים־וילך','האזינו','וזאת הברכה'];
+const SHABBATOT = ['שבת שובה','שבת חול המועד סוכות','שמחת תורה','שבת חנוכה','שבת שקלים','שבת זכור',
+ 'שבת פרה','שבת החודש','שבת הגדול','שבת חול המועד פסח','שבת ראש חודש','ראש השנה','יום הכיפורים',
+ 'סוכות','שמיני עצרת','פסח','שביעי של פסח','שבועות'];
+
 /* html2canvas משכפל את המסמך לתוך מסגרת פנימית; אם נשאיר בה קישור לגופנים
    חיצוניים הייצוא ימתין לרשת. לכן מושכים את קובץ ה‑CSS פעם אחת ומטמיעים אותו. */
 const FONT_CSS_URL = 'https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Heebo:wght@300;400;500;700;900&display=swap';
@@ -649,6 +774,7 @@ function defaults(){
     dedication:'',
     showPhoto:true,
     showBsd:true,
+    showAddress:true,
     photo:null,
     theme:'royal',
     layout:'list',
@@ -684,6 +810,10 @@ document.addEventListener('alpine:init', () => {
     showPreview:false,
     previewUrl:'',
     previewBlob:null,
+    tp:{ open:false, item:null, h:18, m:0 },
+    minuteSteps:[0,5,10,15,20,25,30,35,40,45,50,55],
+    parashot:PARASHOT,
+    shabbatot:SHABBATOT,
     quickAdd:[
       { label:'הדלקת נרות',        time:'18:05', sec:0 },
       { label:'שיר השירים',        time:'18:00', sec:0 },
@@ -699,6 +829,7 @@ document.addEventListener('alpine:init', () => {
     /* ---------- אתחול ---------- */
     init(){
       this.load();
+      if (!this.d.hdate) this.d.hdate = hebrewDate(comingShabbat());
       this.applyTheme();
       this.$watch('d', () => {
         this.save(); this.applyTheme(); this.$nextTick(()=>this.fit());
@@ -718,16 +849,36 @@ document.addEventListener('alpine:init', () => {
     get activeCount(){ return this.visibleSections.reduce((n,s)=>n + s.items.filter(i=>i.enabled).length, 0); },
 
     /* ---------- עריכה ---------- */
-    normalizeTime(it){
-      if (it.freeText) return;
-      let v = (it.time || '').trim().replace(/[.\u05f4"']/g, ':');
-      let m = v.match(/^(\d{1,2}):(\d{1,2})$/) || v.match(/^(\d{1,2})(\d{2})$/);
-      if (m){
-        let h = Math.min(23, parseInt(m[1],10)), mi = Math.min(59, parseInt(m[2],10));
-        it.time = String(h).padStart(2,'0') + ':' + String(mi).padStart(2,'0');
-      } else if (/^\d{1,2}$/.test(v)){
-        it.time = String(Math.min(23, parseInt(v,10))).padStart(2,'0') + ':00';
-      }
+    /* ---------- בורר השעות ---------- */
+    pad(n){ return String(n).padStart(2,'0'); },
+    openTime(it){
+      const m = (it.time || '').match(/^(\d{1,2}):(\d{2})$/);
+      this.tp.item = it;
+      this.tp.h = m ? Math.min(23, parseInt(m[1],10)) : 18;
+      this.tp.m = m ? Math.min(59, parseInt(m[2],10)) : 0;
+      this.tp.open = true;
+    },
+    setTime(h, m){
+      this.tp.h = (h + 24) % 24;
+      this.tp.m = (m + 60) % 60;
+      if (this.tp.item) this.tp.item.time = this.pad(this.tp.h) + ':' + this.pad(this.tp.m);
+    },
+    nudge(mins){
+      const total = (this.tp.h * 60 + this.tp.m + mins + 1440) % 1440;
+      this.setTime(Math.floor(total / 60), total % 60);
+    },
+
+    /* ---------- תאריך עברי ופרשה ---------- */
+    fillShabbatDate(){
+      const d = hebrewDate(comingShabbat());
+      if (d){ this.d.hdate = d; this.toast('התאריך עודכן לשבת הקרובה'); }
+      else this.toast('הדפדפן אינו תומך בלוח השנה העברי');
+    },
+    pickParasha(e){
+      const v = e.target.value;
+      if (!v) return;
+      this.d.parasha = PARASHOT.includes(v) ? ('פרשת ' + v) : v;
+      e.target.value = '';
     },
     addItem(s){ s.items.push({ id:uid(), label:'תפילה חדשה', time:'18:00', note:'', enabled:true, freeText:false }); },
     addSection(){ this.d.sections.push({ id:uid(), title:'קבוצה חדשה', enabled:true, items:[
