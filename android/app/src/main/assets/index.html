@@ -296,6 +296,10 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .group-body.dragging-list .item{transition:transform .18s cubic-bezier(.2,.8,.3,1)}
 .group-body.dragging-list .item.dragging{transition:none}
 .no-select,.no-select *{user-select:none;-webkit-user-select:none}
+/* לחיצה ארוכה על שדה מיועדת לגרירה, לא לבחירת מילה. השדה חוזר להיות
+   ניתן לבחירה ברגע שהוא במוקד, כדי שעריכת טקסט תעבוד כרגיל. */
+.item input,.item button.inp-time{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.item input:focus{user-select:text;-webkit-user-select:text}
 
 
 /* מתג */
@@ -1165,24 +1169,34 @@ document.addEventListener('alpine:init', () => {
        כדי שלחיצה ארוכה עליהם לא תגרור ולא תפעיל אותם בטעות. */
     pressRow(e, sec){
       if (e.pointerType === 'mouse' && e.button !== 0) return;
-      if (e.target.closest('button, label.sw')) return;
+      if (e.target.closest('button:not(.inp-time), label.sw')) return;
       const row = e.target.closest('.item');
       if (!row) return;
       const list = row.parentElement;
       const x0 = e.clientX, y0 = e.clientY;
+      /* חוסמים בחירת טקסט ותפריט הקשר כל עוד הלחיצה נמשכת: בלעדיהם הדפדפן
+         משתלט על המחווה, שולח pointercancel, והגרירה מתבטלת. */
+      const veto = (ev) => ev.preventDefault();
+      document.addEventListener('selectstart', veto);
+      document.addEventListener('contextmenu', veto);
       const stop = () => {
         clearTimeout(this._pressTimer);
+        document.removeEventListener('selectstart', veto);
+        document.removeEventListener('contextmenu', veto);
         window.removeEventListener('pointermove', watch);
         window.removeEventListener('pointerup', stop);
         window.removeEventListener('pointercancel', stop);
       };
       const watch = (ev) => {
-        if (Math.abs(ev.clientY - y0) > 10 || Math.abs(ev.clientX - x0) > 10) stop();
+        if (Math.abs(ev.clientY - y0) > 14 || Math.abs(ev.clientX - x0) > 14) stop();
       };
       window.addEventListener('pointermove', watch);
       window.addEventListener('pointerup', stop);
       window.addEventListener('pointercancel', stop);
-      this._pressTimer = setTimeout(() => { stop(); this.beginDrag(row, list, sec, y0); }, 420);
+      this._pressTimer = setTimeout(() => {
+        stop();
+        this.beginDrag(row, list, sec, y0);
+      }, 300);
     },
     beginDrag(row, list, sec, startY){
       const rows = [...list.querySelectorAll('.item')];
@@ -1200,8 +1214,10 @@ document.addEventListener('alpine:init', () => {
       try { window.getSelection().removeAllRanges(); } catch(err){}
       row.style.transition = 'transform .14s ease';      /* הרמה רכה של השורה */
       row.style.transform = 'scale(1.02)';
-      const block = (ev) => ev.preventDefault();          /* עוצר גלילה בזמן הגרירה */
+      const block = (ev) => ev.preventDefault();          /* עוצר גלילה ובחירת טקסט בזמן הגרירה */
       document.addEventListener('touchmove', block, { passive:false });
+      document.addEventListener('selectstart', block);
+      document.addEventListener('contextmenu', block);
 
       const move = (ev) => {
         if (!lifted){ lifted = true; row.style.transition = 'none'; }
@@ -1219,6 +1235,8 @@ document.addEventListener('alpine:init', () => {
       };
       const end = () => {
         document.removeEventListener('touchmove', block);
+        document.removeEventListener('selectstart', block);
+        document.removeEventListener('contextmenu', block);
         window.removeEventListener('pointermove', move);
         window.removeEventListener('pointerup', end);
         window.removeEventListener('pointercancel', end);
