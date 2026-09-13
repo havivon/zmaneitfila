@@ -70,7 +70,9 @@ button{font-family:inherit}
 .brand-mark svg{width:23px;height:23px}
 .brand-t{font-size:19px;font-weight:800;letter-spacing:.2px;line-height:1.15}
 .brand-s{font-size:12.5px;color:var(--muted);font-weight:400}
-.topbar-actions{margin-inline-start:auto;display:flex;gap:9px;flex-wrap:wrap}
+.topbar-actions{margin-inline-start:auto;display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.share-pair{display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1 1 300px}
+.share-pair .btn{width:100%;justify-content:center}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line-soft);
   background:rgba(255,255,255,.05);color:var(--txt);padding:10px 15px;border-radius:12px;font-size:14px;
@@ -228,9 +230,14 @@ button.inp-time:hover{border-color:rgba(232,196,106,.5);background:rgba(232,196,
 .modal-head{display:flex;align-items:center;gap:10px}
 .modal-title{font-family:'Frank Ruhl Libre',serif;font-size:17px;font-weight:800;color:var(--gold-soft)}
 .modal-sub{font-size:12.5px;color:var(--muted)}
-.modal-img{max-width:100%;max-height:58vh;border-radius:9px;display:block;margin:0 auto;
-  border:1px solid var(--line-soft)}
 .modal-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.preview-full{padding:0;background:rgba(3,5,12,.97)}
+.prev-img{max-width:100vw;max-height:100vh;width:auto;height:auto;display:block;cursor:zoom-out}
+.prev-close{position:fixed;top:14px;left:14px;z-index:3;width:44px;height:44px;border-radius:50%;
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.28);color:#fff;
+  display:grid;place-items:center;cursor:pointer;padding:0}
+.prev-close svg{width:20px;height:20px}
+.prev-close:hover{background:rgba(0,0,0,.75)}
 
 /* ============ פאנל ניהול ============ */
 .panel{min-width:0;border-radius:20px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
@@ -358,22 +365,20 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
       </div>
     </div>
     <div class="topbar-actions">
-      <button class="btn btn-sm" @click="doPrint()" title="הדפסת הלוח בלבד">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
-        <span>הדפסה</span>
-      </button>
-      <button class="btn btn-sm" @click="downloadImage()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
-        <span>הורדה</span>
-      </button>
       <button class="btn btn-gold btn-sm" @click="openPreview()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
         <span>תצוגה מקדימה</span>
       </button>
-      <button class="btn btn-wa" @click="shareWhatsApp()">
-        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m0 1.67c2.2 0 4.27.86 5.82 2.42a8.2 8.2 0 0 1 2.42 5.83c0 4.54-3.7 8.23-8.24 8.23a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24M8.53 7.33c-.16 0-.43.06-.65.31-.22.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.74 2.78 4.23 3.79.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29-.24-.12-1.46-.72-1.69-.8-.22-.09-.39-.13-.55.12-.17.25-.63.79-.77.95-.14.17-.28.19-.53.07-.24-.13-1.04-.39-1.99-1.23-.73-.65-1.23-1.46-1.37-1.71-.14-.24-.02-.37.11-.5.11-.11.24-.28.37-.42.12-.15.16-.25.24-.41.08-.17.04-.31-.02-.43-.06-.12-.55-1.34-.76-1.84-.2-.48-.4-.42-.55-.42z"/></svg>
-        <span>שתף בוואטסאפ</span>
-      </button>
+      <div class="share-pair">
+        <button class="btn btn-wa" @click="shareWhatsApp()">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m0 1.67c2.2 0 4.27.86 5.82 2.42a8.2 8.2 0 0 1 2.42 5.83c0 4.54-3.7 8.23-8.24 8.23a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24M8.53 7.33c-.16 0-.43.06-.65.31-.22.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.74 2.78 4.23 3.79.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29-.24-.12-1.46-.72-1.69-.8-.22-.09-.39-.13-.55.12-.17.25-.63.79-.77.95-.14.17-.28.19-.53.07-.24-.13-1.04-.39-1.99-1.23-.73-.65-1.23-1.46-1.37-1.71-.14-.24-.02-.37.11-.5.11-.11.24-.28.37-.42.12-.15.16-.25.24-.41.08-.17.04-.31-.02-.43-.06-.12-.55-1.34-.76-1.84-.2-.48-.4-.42-.55-.42z"/></svg>
+          <span>שתף בוואטסאפ</span>
+        </button>
+        <button class="btn btn-gold" @click="downloadImage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
+          <span>הורדה</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -709,31 +714,14 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
   </div>
 </div>
 
-<div class="modal" x-show="showPreview" x-transition.opacity @keydown.escape.window="closePreview()">
-  <div class="modal-card" @click.outside="closePreview()">
-    <div class="modal-head">
-      <div>
-        <div class="modal-title">תצוגה מקדימה לפני שיתוף</div>
-        <div class="modal-sub">כך בדיוק תיראה התמונה שתישלח לקבוצה</div>
-      </div>
-      <button class="icon-btn" style="margin-inline-start:auto" @click="closePreview()" title="סגירה">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <template x-if="previewUrl">
-      <img class="modal-img" :src="previewUrl" alt="לוח זמני התפילות">
-    </template>
-    <div class="modal-sub" style="text-align:center">בטלפון אפשר גם ללחוץ לחיצה ארוכה על התמונה, ולבחור "שיתוף" או "שמירת תמונה"</div>
-    <div class="modal-actions">
-      <button class="btn btn-wa" @click="shareWhatsApp()">
-        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m0 1.67c2.2 0 4.27.86 5.82 2.42a8.2 8.2 0 0 1 2.42 5.83c0 4.54-3.7 8.23-8.24 8.23a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24"/></svg>
-        שתף בוואטסאפ
-      </button>
-      <button class="btn btn-gold" @click="downloadImage()">הורדת התמונה</button>
-      <button class="btn" @click="copyImage()">העתקה ללוח</button>
-      <button class="btn btn-ghost" @click="closePreview()">חזרה לעריכה</button>
-    </div>
-  </div>
+<div class="modal preview-full" x-show="showPreview" x-transition.opacity
+     @keydown.escape.window="closePreview()">
+  <button class="prev-close" @click="closePreview()" title="סגירה" aria-label="סגירה">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <template x-if="previewUrl">
+    <img class="prev-img" :src="previewUrl" @click="closePreview()" alt="לוח זמני התפילות">
+  </template>
 </div>
 
 <div class="toast" :class="toastMsg && 'show'" x-text="toastMsg"></div>
@@ -1328,12 +1316,6 @@ document.addEventListener('alpine:init', () => {
       setTimeout(()=>URL.revokeObjectURL(url), 4000);
       return true;
     },
-    shareText(){
-      const parts = [this.d.synagogue];
-      if (this.d.subtitle.trim()) parts.push(this.d.subtitle.trim());
-      const meta = this.headLine.join(' · ');
-      return parts.join(' — ') + (meta ? '\n' + meta : '') + '\nזמני התפילות המצורפים. ' + (this.d.blessing || '');
-    },
     /* התמונה מוכנה מראש ברקע, כדי שהתצוגה המקדימה והשיתוף ייפתחו מיד */
     schedulePrepare(){
       clearTimeout(this._prepTimer);
@@ -1375,21 +1357,11 @@ document.addEventListener('alpine:init', () => {
       if (!blob) { this.toast('שגיאה ביצירת התמונה'); return; }
       if (await this.saveBlob(blob, this.fileName())) this.toast('התמונה נשמרה במכשיר');
     },
-    async copyImage(){
-      try {
-        const blob = await this.currentBlob();
-        await navigator.clipboard.write([ new ClipboardItem({ 'image/png': blob }) ]);
-        this.toast('התמונה הועתקה — הדביקו בוואטסאפ');
-      } catch(e){
-        this.toast('הדפדפן לא תומך בהעתקה — מורידים את התמונה');
-        this.downloadImage();
-      }
-    },
     async shareWhatsApp(){
       const blob = await this.currentBlob();
       if (!blob) { this.toast('שגיאה ביצירת התמונה'); return; }
       if (NATIVE){
-        NATIVE.shareImage(await this.blobToDataUrl(blob), this.shareText());
+        NATIVE.shareImage(await this.blobToDataUrl(blob), '');
         this.closePreview();
         this.toast('בחרו את וואטסאפ מרשימת השיתוף');
         return;
@@ -1397,7 +1369,7 @@ document.addEventListener('alpine:init', () => {
       const file = new File([blob], this.fileName(), { type:'image/png' });
       if (navigator.canShare && navigator.canShare({ files:[file] })){
         try {
-          await navigator.share({ files:[file], title:this.d.synagogue, text:this.shareText() });
+          await navigator.share({ files:[file] });
           this.closePreview();
           this.toast('בחרו את קבוצת הוואטסאפ ושלחו');
           return;
@@ -1410,7 +1382,6 @@ document.addEventListener('alpine:init', () => {
       window.open('https://web.whatsapp.com/', '_blank', 'noopener');
       this.toast('התמונה נשמרה — צרפו אותה לקבוצה בוואטסאפ');
     },
-    doPrint(){ window.print(); },
     toast(msg){
       this.toastMsg = msg;
       clearTimeout(this._toast);
