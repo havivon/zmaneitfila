@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>לוח זמני תפילות יחזקאל</title>
-<meta name="description" content="ניהול ועיצוב לוח זמני התפילות של בית כנסת יחזקאל — עריכת זמנים, בחירת תפילות ושיתוף כתמונה בוואטסאפ">
+<title>לוח זמני תפילות</title>
+<meta name="description" content="ניהול ועיצוב לוח זמני תפילות לבית הכנסת — עריכת זמנים, בחירת תפילות ושיתוף כתמונה בוואטסאפ">
 <link rel="stylesheet" href="fonts.css">
 <script src="vendor/html2canvas.min.js"></script>
 <script defer src="vendor/alpine.min.js"></script>
@@ -64,10 +64,10 @@ button{font-family:inherit}
   background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));
   border:1px solid var(--line);box-shadow:0 18px 40px -28px rgba(0,0,0,.9)}
 .brand{display:flex;align-items:center;gap:13px;min-width:0}
-.brand-mark{width:44px;height:44px;border-radius:13px;flex:0 0 auto;
-  background:linear-gradient(145deg,#e8c46a,#a97f24);display:grid;place-items:center;
-  color:#1a1205;font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:22px;
-  box-shadow:0 8px 22px -10px rgba(232,196,106,.85)}
+.brand-mark{width:44px;height:44px;border-radius:13px;flex:0 0 auto;display:grid;place-items:center;
+  background:linear-gradient(160deg,rgba(232,196,106,.16),rgba(232,196,106,.04));
+  border:1px solid rgba(232,196,106,.38);color:var(--gold-soft)}
+.brand-mark svg{width:23px;height:23px}
 .brand-t{font-size:19px;font-weight:800;letter-spacing:.2px;line-height:1.15}
 .brand-s{font-size:12.5px;color:var(--muted);font-weight:400}
 .topbar-actions{margin-inline-start:auto;display:flex;gap:9px;flex-wrap:wrap}
@@ -205,6 +205,8 @@ button{font-family:inherit}
 .tp-labels{display:flex;justify-content:center;gap:6px;padding:0 10px;direction:ltr}
 .tp-labels span{width:96px;text-align:center;font-size:12px;color:var(--muted);font-weight:700}
 .tp-labels i{width:14px}
+.tp-free{border-top:1px solid var(--line-soft);margin-top:4px;padding-top:11px}
+.tp-free label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:6px}
 button.inp-time{cursor:pointer;text-align:center;display:block}
 button.inp-time:hover{border-color:rgba(232,196,106,.5);background:rgba(232,196,106,.1)}
 
@@ -256,14 +258,11 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .item-main{min-width:0}
 .item-line{display:flex;gap:7px;align-items:center}
 .item-line .inp{padding:7px 9px;font-size:13.5px;border-radius:9px}
-.inp-time{width:86px;flex:0 0 auto;text-align:center;font-weight:700;color:var(--gold-soft);letter-spacing:.5px}
+.inp-time{width:84px;flex:0 0 auto;text-align:center;font-weight:700;color:var(--gold-soft);letter-spacing:.5px}
+.inp-time.txt{font-size:11.5px;letter-spacing:0;line-height:1.2}
 .note-inp{margin-top:6px;font-size:12.5px!important;padding:6px 9px!important}
 .item-tools{display:flex;gap:3px;flex:0 0 auto}
-/* במסך צר כפתורי השורה יורדים לשורה משלהם, אחרת שדה שם התפילה נמעך */
-@media(max-width:620px){
-  .item{grid-template-columns:auto 1fr;row-gap:7px}
-  .item-tools{grid-column:1 / -1;justify-content:flex-end}
-}
+
 .icon-btn{width:28px;height:28px;border-radius:9px;border:1px solid transparent;background:rgba(255,255,255,.05);
   color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:.16s;padding:0}
 .icon-btn:hover{background:rgba(255,255,255,.13);color:var(--txt)}
@@ -328,10 +327,14 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
   <!-- ===== סרגל עליון ===== -->
   <header class="topbar fade-up">
     <div class="brand">
-      <div class="brand-mark">י</div>
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.2 2"/>
+        </svg>
+      </div>
       <div>
         <div class="brand-t">לוח זמני תפילות</div>
-        <div class="brand-s">ממשק ניהול · בית כנסת יחזקאל</div>
+        <div class="brand-s">ממשק ניהול</div>
       </div>
     </div>
     <div class="topbar-actions">
@@ -468,23 +471,14 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                     <label class="sw"><input type="checkbox" x-model="it.enabled"><i></i></label>
                     <div class="item-main">
                       <div class="item-line">
-                        <button class="inp inp-time" x-show="!it.freeText" @click="openTime(it)"
+                        <button class="inp inp-time" :class="it.freeText && 'txt'" @click="openTime(it)"
                                 x-text="it.time || '--:--'" title="בחירת שעה"></button>
-                        <input class="inp inp-time" x-show="it.freeText" x-model="it.time"
-                               maxlength="24" placeholder="בצאת השבת">
                         <input class="inp" x-model="it.label" placeholder="שם התפילה">
                       </div>
                       <input class="inp note-inp" x-model="it.note" placeholder="הערה (לא חובה) — למשל: בעזרת הנשים">
                     </div>
                     <div class="item-tools">
-                      <button class="icon-btn" @click="it.freeText=!it.freeText" :title="it.freeText?'מעבר לשעה':'טקסט חופשי'"
-                              :style="it.freeText?'color:#e8c46a':''">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></button>
-                      <button class="icon-btn" @click="moveItem(s,ii,-1)" :disabled="ii===0" title="העלה">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 15l-6-6-6 6"/></svg></button>
-                      <button class="icon-btn" @click="moveItem(s,ii,1)" :disabled="ii===s.items.length-1" title="הורד">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>
-                      <button class="icon-btn del" @click="s.items.splice(ii,1)" title="מחק">
+                      <button class="icon-btn del" @click="s.items.splice(ii,1)" title="מחיקת השורה">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
                     </div>
                   </div>
@@ -502,12 +496,6 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
             הוסף קבוצת זמנים חדשה
           </button>
 
-          <div class="sect-title">תוספות מהירות</div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap">
-            <template x-for="q in quickAdd" :key="q.label">
-              <button class="btn btn-sm btn-ghost" @click="quickInsert(q)" x-text="'+ ' + q.label"></button>
-            </template>
-          </div>
         </div>
 
         <!-- ---- כותרת ופרטים ---- -->
@@ -654,6 +642,12 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
         </template>
         <div class="tp-pad"></div>
       </div>
+    </div>
+
+    <div class="tp-free">
+      <label>או טקסט במקום שעה</label>
+      <input class="inp" x-model="tp.text" @input="applyFreeText()" maxlength="24"
+             placeholder="למשל: בצאת השבת">
     </div>
 
     <div class="modal-actions">
@@ -951,21 +945,12 @@ document.addEventListener('alpine:init', () => {
     showPreview:false,
     previewUrl:'',
     previewBlob:null,
-    tp:{ open:false, item:null, h:18, m:0 },
+    _rev:0,            /* עולה בכל שינוי בנתונים */
+    _cache:null,       /* {rev, blob} — התמונה שכבר הוכנה */
+    tp:{ open:false, item:null, h:18, m:0, text:'' },
     appVersion:'',
     parashot:PARASHOT,
     shabbatot:SHABBATOT,
-    quickAdd:[
-      { label:'הדלקת נרות',        time:'18:05', sec:0 },
-      { label:'שיר השירים',        time:'18:00', sec:0 },
-      { label:'קבלת שבת',          time:'18:40', sec:0 },
-      { label:'שחרית',             time:'08:00', sec:1 },
-      { label:'ותיקין',            time:'05:40', sec:1 },
-      { label:'שיעור בהלכה',       time:'16:45', sec:1 },
-      { label:'אבות ובנים',        time:'17:00', sec:1 },
-      { label:'סעודה שלישית',      time:'18:10', sec:1 },
-      { label:'הבדלה',             time:'צאת השבת', sec:1, freeText:true }
-    ],
 
     /* ---------- אתחול ---------- */
     init(){
@@ -977,9 +962,12 @@ document.addEventListener('alpine:init', () => {
       }
       this.applyTheme();
       this.$watch('d', () => {
+        this._rev++;
         this.save(); this.applyTheme(); this.$nextTick(()=>this.fit());
         if (this.showPreview) this.closePreview();
+        this.schedulePrepare();
       });
+      this.schedulePrepare();
       this.$nextTick(()=>this.fit());
       window.addEventListener('resize', ()=>this.fit());
       if (NATIVE && NATIVE.appVersion) this.appVersion = NATIVE.appVersion();
@@ -1008,8 +996,16 @@ document.addEventListener('alpine:init', () => {
       this.tp.item = it;
       this.tp.h = m ? Math.min(23, parseInt(m[1],10)) : 18;
       this.tp.m = m ? Math.min(59, parseInt(m[2],10)) : 0;
+      this.tp.text = it.freeText ? (it.time || '') : '';
       this.tp.open = true;
       this.$nextTick(() => this.scrollWheels('auto'));
+    },
+    /* הקלדת טקסט מחליפה את השעה; מחיקתו מחזירה את השעה שנבחרה בגלגלים */
+    applyFreeText(){
+      if (!this.tp.item) return;
+      const v = (this.tp.text || '').trim();
+      if (v){ this.tp.item.freeText = true;  this.tp.item.time = v; }
+      else   { this.tp.item.freeText = false; this.tp.item.time = this.pad(this.tp.h) + ':' + this.pad(this.tp.m); }
     },
     scrollWheels(behavior){
       this._wheelLock = true;
@@ -1033,7 +1029,11 @@ document.addEventListener('alpine:init', () => {
     setTime(h, m){
       this.tp.h = (h + 24) % 24;
       this.tp.m = (m + 60) % 60;
-      if (this.tp.item) this.tp.item.time = this.pad(this.tp.h) + ':' + this.pad(this.tp.m);
+      this.tp.text = '';
+      if (this.tp.item){
+        this.tp.item.freeText = false;
+        this.tp.item.time = this.pad(this.tp.h) + ':' + this.pad(this.tp.m);
+      }
     },
 
     /* ---------- תאריך עברי ופרשה ---------- */
@@ -1063,41 +1063,6 @@ document.addEventListener('alpine:init', () => {
     removeSection(i){ if (confirm('למחוק את הקבוצה וכל הזמנים שבה?')) this.d.sections.splice(i,1); },
     moveSection(i,dir){ const j=i+dir; if(j<0||j>=this.d.sections.length) return;
       const a=this.d.sections; [a[i],a[j]]=[a[j],a[i]]; },
-    moveItem(s,i,dir){ const j=i+dir; if(j<0||j>=s.items.length) return;
-      [s.items[i],s.items[j]]=[s.items[j],s.items[i]]; },
-    quickInsert(q){
-      const s = this.d.sections[Math.min(q.sec, this.d.sections.length-1)] || this.d.sections[0];
-      if (!s) return;
-      s.enabled = true;
-      s.items.push({ id:uid(), label:q.label, time:q.time, note:'', enabled:true, freeText:!!q.freeText });
-      this.tab='times';
-      this.toast('נוסף: ' + q.label);
-    },
-    onPhoto(e){
-      const f = e.target.files && e.target.files[0];
-      e.target.value = '';
-      if (!f) return;
-      if (!/^image\//.test(f.type)){ this.toast('יש לבחור קובץ תמונה'); return; }
-      const r = new FileReader();
-      r.onload = () => {
-        const img = new Image();
-        img.onload = () => {
-          /* חיתוך לריבוע והקטנה — כדי שהתמונה תישמר בדפדפן ותישלח מהר */
-          const S = 640, c = document.createElement('canvas');
-          c.width = c.height = S;
-          const ctx = c.getContext('2d');
-          const side = Math.min(img.width, img.height);
-          const sx = (img.width - side) / 2, sy = (img.height - side) / 2;
-          ctx.fillStyle = '#1a1409'; ctx.fillRect(0,0,S,S);
-          ctx.drawImage(img, sx, sy, side, side, 0, 0, S, S);
-          this.d.photo = c.toDataURL('image/jpeg', 0.88);
-          this.toast('התמונה עודכנה');
-        };
-        img.onerror = () => this.toast('לא ניתן לקרוא את התמונה');
-        img.src = r.result;
-      };
-      r.readAsDataURL(f);
-    },
 
     /* ---------- עיצוב ושמירה ---------- */
     applyTheme(){
@@ -1160,14 +1125,19 @@ document.addEventListener('alpine:init', () => {
         onclone: (doc) => {
           const sc = doc.getElementById('posterScaler');
           if (sc) sc.style.transform = 'none';
+          /* פאנל הניהול והחלונות אינם חלק מהתמונה — הסרתם מקצרת את הייצוא */
+          doc.querySelectorAll('.panel,.topbar,.modal,.toast,.busy,.stage-head').forEach(el => el.remove());
         }
       });
     },
     async toBlob(){
       this.busy = true;
       try {
+        const rev = this._rev;
         const canvas = await this.renderCanvas();
-        return await new Promise(res => canvas.toBlob(res, 'image/png', 0.97));
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/png', 0.97));
+        if (blob && rev === this._rev) this._cache = { rev, blob };
+        return blob;
       } finally { this.busy = false; }
     },
     fileName(){
@@ -1205,13 +1175,31 @@ document.addEventListener('alpine:init', () => {
       const meta = this.metaList.join(' · ');
       return parts.join(' — ') + (meta ? '\n' + meta : '') + '\nזמני התפילות המצורפים. ' + (this.d.blessing || '');
     },
-    /* התמונה שנוצרה בתצוגה המקדימה משמשת גם לשיתוף — בלי לייצר אותה פעמיים */
+    /* התמונה מוכנה מראש ברקע, כדי שהתצוגה המקדימה והשיתוף ייפתחו מיד */
+    schedulePrepare(){
+      clearTimeout(this._prepTimer);
+      this._prepTimer = setTimeout(() => this.prepareImage(), 1500);
+    },
+    async prepareImage(){
+      if (this._preparing || this.busy || this.tp.open || this.showPreview) return;
+      if (this._cache && this._cache.rev === this._rev) return;
+      this._preparing = true;
+      try {
+        const rev = this._rev;
+        const canvas = await this.renderCanvas();
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/png', 0.97));
+        if (blob && rev === this._rev) this._cache = { rev, blob };
+      } catch(e){ /* הכנה ברקע — כישלון בה אינו מפריע לדבר */ }
+      finally { this._preparing = false; }
+    },
     async currentBlob(){
       if (this.showPreview && this.previewBlob) return this.previewBlob;
+      if (this._cache && this._cache.rev === this._rev) return this._cache.blob;
       return await this.toBlob();
     },
     async openPreview(){
-      const blob = await this.toBlob();
+      let blob = (this._cache && this._cache.rev === this._rev) ? this._cache.blob : null;
+      if (!blob) blob = await this.toBlob();
       if (!blob){ this.toast('שגיאה ביצירת התמונה'); return; }
       if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
       this.previewBlob = blob;
