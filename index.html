@@ -267,8 +267,10 @@ button.inp-time:hover{border-color:rgba(232,196,106,.5);background:rgba(232,196,
 textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-.group{border:1px solid var(--line-soft);border-radius:15px;margin-bottom:14px;overflow:hidden;background:rgba(0,0,0,.18)}
-.group-head{display:flex;align-items:center;gap:9px;padding:11px 12px;background:rgba(255,255,255,.04)}
+.group{border:1px solid var(--line-soft);border-radius:15px;margin-bottom:14px;overflow:hidden;background:rgba(0,0,0,.28)}
+.group-head{display:flex;align-items:center;gap:9px;padding:12px;
+  background:linear-gradient(180deg,rgba(232,196,106,.17),rgba(232,196,106,.06));
+  border-bottom:1px solid rgba(232,196,106,.3)}
 .group-head input.title-inp{flex:1;min-width:0;background:transparent;border:0;color:var(--gold-soft);
   font-size:15.5px;font-weight:800;font-family:'Frank Ruhl Libre',serif;padding:3px 4px;border-radius:7px}
 .group-head input.title-inp:focus{outline:0;background:rgba(0,0,0,.35)}
@@ -601,7 +603,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
           <div class="field"><label>שורת מידע נוספת (כניסת שבת וכד')</label>
             <input class="inp" x-model="d.extraMeta" placeholder="כניסת השבת 18:05 · צאת השבת 19:05"></div>
 
-          <div class="sect-title">שורות תחתונות</div>
+          <div class="sect-title">הודעות מודגשות</div>
           <div class="field"><label>הודעה מודגשת (רצועת זהב מעל הזמנים)</label>
             <input class="inp" x-model="d.banner" placeholder="השבת — סעודה שלישית בחסות משפחת כהן"></div>
           <div class="field"><label>ברכת סיום</label>
