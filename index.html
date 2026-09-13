@@ -282,10 +282,12 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .icon-btn:hover{background:rgba(255,255,255,.13);color:var(--txt)}
 .icon-btn.del:hover{background:rgba(255,86,86,.18);color:#ffb0b0}
 .icon-btn svg{width:14px;height:14px}
-.item.dragging{background:rgba(232,196,106,.14);border-color:rgba(232,196,106,.45);
-  transform:scale(1.015)}
+.item.dragging{background:rgba(232,196,106,.15);border-color:rgba(232,196,106,.5);
+  position:relative;z-index:5}
+.group-body.dragging-list .item{transition:transform .18s cubic-bezier(.2,.8,.3,1)}
+.group-body.dragging-list .item.dragging{transition:none}
 .no-select,.no-select *{user-select:none;-webkit-user-select:none}
-.group-body.dragging-list .item:not(.dragging){transition:transform .12s ease}
+
 
 /* מתג */
 .sw{position:relative;width:42px;height:24px;flex:0 0 auto;cursor:pointer}
@@ -1160,42 +1162,55 @@ document.addEventListener('alpine:init', () => {
       window.addEventListener('pointermove', watch);
       window.addEventListener('pointerup', stop);
       window.addEventListener('pointercancel', stop);
-      this._pressTimer = setTimeout(() => { stop(); this.beginDrag(row, list, sec); }, 420);
+      this._pressTimer = setTimeout(() => { stop(); this.beginDrag(row, list, sec, y0); }, 420);
     },
-    beginDrag(row, list, sec){
+    beginDrag(row, list, sec, startY){
       const rows = [...list.querySelectorAll('.item')];
-      const height = rows.length > 1 ? (rows[1].getBoundingClientRect().top - rows[0].getBoundingClientRect().top)
-                                     : row.offsetHeight;
-      let from = rows.indexOf(row);
-      if (from < 0 || !height) return;
+      const n = rows.length;
+      if (n < 2) return;
+      const h = rows[1].getBoundingClientRect().top - rows[0].getBoundingClientRect().top;
+      const from = rows.indexOf(row);
+      if (from < 0 || !h) return;
+      let to = from, lifted = false;
+
       row.classList.add('dragging');
       list.classList.add('dragging-list');
       document.body.classList.add('no-select');
       if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       try { window.getSelection().removeAllRanges(); } catch(err){}
+      row.style.transition = 'transform .14s ease';      /* הרמה רכה של השורה */
+      row.style.transform = 'scale(1.02)';
       const block = (ev) => ev.preventDefault();          /* עוצר גלילה בזמן הגרירה */
       document.addEventListener('touchmove', block, { passive:false });
 
       const move = (ev) => {
-        const first = list.querySelector('.item');
-        if (!first || !height) return;
-        const top = first.getBoundingClientRect().top;
-        let to = Math.round((ev.clientY - top - height / 2) / height);
-        to = Math.max(0, Math.min(sec.items.length - 1, to));
-        if (to !== from){
-          const [moved] = sec.items.splice(from, 1);
-          sec.items.splice(to, 0, moved);
-          from = to;
-        }
+        if (!lifted){ lifted = true; row.style.transition = 'none'; }
+        const dy = ev.clientY - startY;
+        row.style.transform = 'translateY(' + dy + 'px) scale(1.02)';
+        to = Math.max(0, Math.min(n - 1, from + Math.round(dy / h)));
+        /* שאר השורות מפנות מקום בהחלקה */
+        rows.forEach((r, i) => {
+          if (i === from) return;
+          let shift = 0;
+          if (to > from && i > from && i <= to) shift = -h;
+          else if (to < from && i < from && i >= to) shift = h;
+          r.style.transform = shift ? 'translateY(' + shift + 'px)' : '';
+        });
       };
       const end = () => {
         document.removeEventListener('touchmove', block);
         window.removeEventListener('pointermove', move);
         window.removeEventListener('pointerup', end);
         window.removeEventListener('pointercancel', end);
-        document.body.classList.remove('no-select');
+        /* מנקים את ההזזות ומעדכנים את הסדר באותו פריים, כדי שלא תהיה קפיצה */
+        rows.forEach(r => { r.style.transform = ''; r.style.transition = ''; });
+        row.classList.remove('dragging');
         list.classList.remove('dragging-list');
-        list.querySelectorAll('.item.dragging').forEach(el => el.classList.remove('dragging'));
+        document.body.classList.remove('no-select');
+        if (to !== from){
+          const [moved] = sec.items.splice(from, 1);
+          sec.items.splice(to, 0, moved);
+        }
       };
       window.addEventListener('pointermove', move);
       window.addEventListener('pointerup', end);
