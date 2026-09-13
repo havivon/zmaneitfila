@@ -21,20 +21,18 @@
   --gold-soft:#f6e3ae;
   --gold-deep:#a97f24;
   --accent:#5bb0ff;
-  /* ערכת הפוסטר – נשלטת ע"י המנהל */
-  --p-bg-1:#12224b;
-  --p-bg-2:#050b1c;
-  --p-gold:#e8c46a;
-  --p-gold-soft:#f8e7b6;
-  --p-gold-deep:#8a6a1c;
-  --p-card:#0b1533;
-  --p-card-2:#101d42;
-  --p-txt:#f2f5ff;
-  --p-txt-soft:#aab7d8;
-  --p-on-gold:#201804;
-  --p-meta-bg:rgba(255,255,255,.07);
-  --p-title-shadow:0 1px 0 rgba(0,0,0,.5);
-  --p-meta-line:rgba(232,196,106,.2);
+  /* ערכת הלוח — נשלטת ע"י המנהל */
+  --p-bg-1:#10203f;
+  --p-bg-2:#060b1c;
+  --p-glow:rgba(201,162,74,.14);
+  --p-gold:#c9a24a;
+  --p-gold-soft:#f0dba6;
+  --p-rule:rgba(201,162,74,.26);
+  --p-mat:#0b1730;
+  --p-txt:#eef1f8;
+  --p-txt-soft:#9aa8c6;
+  --p-on-gold:#1b1405;
+  --p-title-shadow:0 2px 0 rgba(0,0,0,.45);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -104,82 +102,82 @@ button{font-family:inherit}
 .poster-stage{overflow:hidden;max-width:100%;display:flex;justify-content:center}
 .poster-scaler{transform-origin:top center;transition:transform .15s ease}
 
-/* ============ הפוסטר ============ */
+/* ============ הלוח ============
+   ערכת "פרוכת": ליל עמוק ופליז. הקשת שבראש והעיטורים שבפינות נגזרים
+   מארון הקודש, והשורות בנויות כלוח מודפס — שם, קו נקודות ושעה.
+   הפרופורציה 9:16 כדי שהתמונה תמלא מסך טלפון בשיתוף.               */
 .poster{
-  width:780px;position:relative;overflow:hidden;
-  background:linear-gradient(172deg,var(--p-bg-1) 0%,var(--p-bg-2) 55%,var(--p-bg-1) 100%);
-  padding:15px;
-  font-family:'Heebo',Arial,sans-serif;
-  color:var(--p-txt);
+  width:720px;min-height:1280px;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+  padding:26px;
+  font-family:'Heebo',Arial,sans-serif;color:var(--p-txt);
+  background-color:var(--p-bg-2);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='58' height='58' viewBox='0 0 58 58'%3E%3Cg fill='none' stroke='%23c9a24a' stroke-width='1' opacity='.07'%3E%3Crect x='19' y='19' width='20' height='20'/%3E%3Crect x='19' y='19' width='20' height='20' transform='rotate(45 29 29)'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(120% 60% at 50% 0%, var(--p-glow), transparent 62%),
+    linear-gradient(176deg, var(--p-bg-1) 0%, var(--p-bg-2) 58%, var(--p-bg-1) 100%);
+  background-repeat:repeat, no-repeat, no-repeat;
 }
 .poster-frame{
-  border:1.5px solid var(--p-gold);
-  border-radius:14px;
-  padding:24px 32px 26px;
-  position:relative;
-  background:linear-gradient(180deg,rgba(255,255,255,.028),rgba(0,0,0,.2));
+  flex:1;display:flex;flex-direction:column;position:relative;
+  border:2px solid var(--p-gold);
+  padding:30px 34px 26px;
 }
-.poster-frame::before,.poster-frame::after{
-  content:"";position:absolute;width:26px;height:26px;border:1px solid var(--p-gold);opacity:.7}
-.poster-frame::before{top:7px;right:7px;border-left:0;border-bottom:0;border-radius:0 8px 0 0}
-.poster-frame::after{bottom:7px;left:7px;border-right:0;border-top:0;border-radius:0 0 0 8px}
-.bsd{position:absolute;top:15px;right:22px;font-size:12.5px;color:var(--p-gold);opacity:.8;
-  font-family:'Frank Ruhl Libre',serif;letter-spacing:.6px}
+.poster-frame::before{                       /* קו פנימי דק, כמו מסגרת מודפסת */
+  content:"";position:absolute;inset:7px;border:1px solid var(--p-rule);pointer-events:none}
+.bsd{position:absolute;top:16px;right:20px;font-size:12.5px;color:var(--p-gold);opacity:.85;
+  font-family:'Frank Ruhl Libre',serif;letter-spacing:.6px;z-index:2}
 
-.p-head{display:flex;align-items:center;gap:22px;padding:10px 0 0}
-.p-head-side{flex:0 0 96px;width:96px}
+/* ---- ראש הלוח: קשת ארון הקודש ---- */
+.p-head{position:relative;padding-top:8px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='430' height='150' viewBox='0 0 430 150'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23c9a24a' stop-opacity='.9'/%3E%3Cstop offset='.55' stop-color='%23c9a24a' stop-opacity='.35'/%3E%3Cstop offset='1' stop-color='%23c9a24a' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23f)' stroke-width='1.6'%3E%3Cpath d='M12 150V78C12 32 104 8 215 8s203 24 203 70v72'/%3E%3Cpath d='M24 150V82C24 41 110 20 215 20s191 21 191 62v68'/%3E%3C/g%3E%3Cpath d='M215 0l7 8-7 8-7-8z' fill='%23c9a24a'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center top;
+}
+.p-head-row{display:flex;align-items:center;gap:20px}
+.p-head-side{flex:0 0 92px;width:92px}
 .p-head-main{flex:1;min-width:0;text-align:center}
-.p-portrait-frame{
-  width:96px;padding:4px;border:1px solid var(--p-gold);border-radius:5px;
-  background:var(--p-meta-bg);
-}
-.p-portrait{
-  width:86px;height:110px;
-  background-size:cover;background-position:center top;background-color:#d8d0bf;
-}
-.p-title{
-  font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:46px;line-height:1.14;
-  color:var(--p-gold-soft);letter-spacing:-.2px;text-shadow:var(--p-title-shadow);
-}
-.p-sub{font-size:17px;color:var(--p-gold);font-weight:400;margin-top:7px;letter-spacing:1px}
-.p-divider{display:flex;align-items:center;justify-content:center;gap:11px;margin-top:13px}
-.p-divider i{display:block;height:1px;width:96px;background:linear-gradient(90deg,transparent,var(--p-gold),transparent);opacity:.85}
-.p-divider b{color:var(--p-gold);font-size:12px;line-height:1;opacity:.9}
-.p-meta{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:15px}
-.p-meta span{font-size:14.5px;color:var(--p-txt);background:var(--p-meta-bg);
-  border:1px solid var(--p-meta-line);border-radius:4px;padding:5px 14px;font-weight:400;letter-spacing:.2px}
-.p-rule{height:1px;margin-top:20px;opacity:.5;
-  background:linear-gradient(90deg,transparent,var(--p-gold) 18%,var(--p-gold) 82%,transparent)}
+.p-portrait-frame{width:92px;padding:4px;border:1px solid var(--p-gold);background:var(--p-mat)}
+.p-portrait{width:82px;height:106px;background-size:cover;background-position:center top;background-color:#d8d0bf}
+.p-title{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:52px;line-height:1.1;
+  color:var(--p-gold-soft);letter-spacing:-.5px;text-shadow:var(--p-title-shadow)}
+.p-sub{font-size:16px;color:var(--p-gold);font-weight:300;margin-top:10px;letter-spacing:5px}
+.p-meta{margin-top:16px;text-align:center;font-size:17px;color:var(--p-txt);font-weight:400;letter-spacing:.3px}
+.p-meta b{color:var(--p-gold);font-weight:400;padding:0 9px;font-size:11px;vertical-align:2px}
+.p-meta-2{margin-top:5px;text-align:center;font-size:14px;color:var(--p-txt-soft);font-weight:300;letter-spacing:.2px}
+.p-rule{height:1px;margin-top:20px;
+  background:linear-gradient(90deg,transparent,var(--p-gold) 20%,var(--p-gold) 80%,transparent);opacity:.55}
 
-.p-banner{margin-top:18px;text-align:center;font-size:16px;font-weight:600;color:var(--p-on-gold);
-  background:linear-gradient(180deg,var(--p-gold-soft),var(--p-gold));border-radius:5px;padding:9px 16px}
+.p-banner{margin-top:18px;text-align:center;font-size:16px;font-weight:500;color:var(--p-on-gold);
+  background:linear-gradient(180deg,var(--p-gold-soft),var(--p-gold));padding:10px 16px;letter-spacing:.3px}
 
-.p-sections{margin-top:20px;display:grid;gap:15px}
-.p-sections.grid-2{grid-template-columns:1fr 1fr}
-.p-card{
-  border:1px solid var(--p-gold);border-radius:9px;overflow:hidden;
-  background:linear-gradient(180deg,var(--p-card-2),var(--p-card));
-}
-.p-card-head{
-  background:linear-gradient(180deg,var(--p-gold),var(--p-gold-deep));
-  color:var(--p-on-gold);text-align:center;font-family:'Frank Ruhl Libre',serif;font-weight:700;
-  font-size:20px;padding:6px 12px;letter-spacing:.4px;
-}
-.p-card-body{padding:5px 18px 9px}
-.p-row{display:flex;align-items:baseline;gap:13px;padding:9px 2px;border-bottom:1px solid var(--p-meta-line)}
+/* ---- גוף הלוח ---- */
+.p-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:30px;padding:18px 0}
+.p-sections{display:grid;gap:34px}
+.p-sections.grid-2{grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.p-card-head{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px}
+.p-card-head i{flex:1;height:1px;background:var(--p-gold);opacity:.5}
+.p-card-head span{font-family:'Frank Ruhl Libre',serif;font-weight:700;font-size:25px;color:var(--p-gold-soft);
+  letter-spacing:1px;white-space:nowrap}
+.p-card-body{padding:2px 6px}
+.p-row{display:flex;align-items:baseline;gap:12px;padding:17px 4px;border-bottom:1px solid var(--p-rule)}
 .p-row:last-child{border-bottom:0}
-.p-time{font-family:'Frank Ruhl Libre',serif;font-weight:700;font-size:24px;color:var(--p-gold);
-  min-width:74px;text-align:center;letter-spacing:.4px;flex:0 0 auto}
-.p-time.txt{font-size:16px;font-weight:700}
-.p-dash{color:var(--p-gold);opacity:.5;flex:0 0 auto}
-.p-label{font-size:17.5px;font-weight:400;color:var(--p-txt);line-height:1.35}
-.p-note{display:block;font-size:13px;color:var(--p-txt-soft);font-weight:300;margin-top:2px}
+.p-label{font-size:22px;font-weight:400;color:var(--p-txt);line-height:1.3;flex:0 0 auto;max-width:62%}
+.p-note{display:block;font-size:13px;color:var(--p-txt-soft);font-weight:300;margin-top:3px;letter-spacing:.2px}
+.p-dots{flex:1;height:10px;min-width:16px;opacity:.55;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='10' viewBox='0 0 9 10'%3E%3Ccircle cx='4.5' cy='6' r='1.15' fill='%23c9a24a'/%3E%3C/svg%3E");
+  background-repeat:repeat-x;background-position:right center}
+.p-time{font-family:'Frank Ruhl Libre',serif;font-weight:700;font-size:34px;color:var(--p-gold-soft);
+  letter-spacing:.5px;flex:0 0 auto;font-variant-numeric:tabular-nums}
+.p-time.txt{font-size:19px;font-weight:700}
 
-.p-foot{margin-top:18px;text-align:center}
-.p-blessing{font-family:'Frank Ruhl Libre',serif;font-weight:700;font-size:31px;color:var(--p-gold-soft);
-  letter-spacing:1.5px}
-.p-ded{margin-top:9px;font-size:13.5px;color:var(--p-txt-soft);font-weight:300;line-height:1.6}
-.p-addr{margin-top:9px;font-size:14px;color:var(--p-gold);font-weight:400;letter-spacing:.4px}
+/* ---- רגל הלוח ---- */
+.p-foot{text-align:center;padding-top:4px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='26' viewBox='0 0 300 26'%3E%3Cg fill='none' stroke='%23c9a24a' stroke-width='1.4' opacity='.75'%3E%3Cpath d='M6 13c40 0 60-9 92-9 20 0 34 5 44 9'/%3E%3Cpath d='M294 13c-40 0-60-9-92-9-20 0-34 5-44 9'/%3E%3C/g%3E%3Cpath d='M150 6l7 7-7 7-7-7z' fill='%23c9a24a'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center top}
+.p-blessing{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:40px;color:var(--p-gold-soft);
+  letter-spacing:2px;margin-top:30px;text-shadow:var(--p-title-shadow)}
+.p-ded{margin-top:12px;font-size:14.5px;color:var(--p-txt-soft);font-weight:300;line-height:1.6}
+.p-addr{margin-top:8px;font-size:15px;color:var(--p-gold);font-weight:400;letter-spacing:.6px}
 
 /* ============ בורר שעות — גלגלים, כמו בקביעת שעון מעורר ============ */
 .tp-card{max-width:min(360px,94vw)}
@@ -268,6 +266,11 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .icon-btn:hover{background:rgba(255,255,255,.13);color:var(--txt)}
 .icon-btn.del:hover{background:rgba(255,86,86,.18);color:#ffb0b0}
 .icon-btn svg{width:14px;height:14px}
+.icon-btn.grip{cursor:grab;touch-action:none}
+.icon-btn.grip:active{cursor:grabbing}
+.item.dragging{background:rgba(232,196,106,.12);border-color:rgba(232,196,106,.4);
+  box-shadow:0 10px 24px -16px #000}
+.group-body.dragging-list .item:not(.dragging){transition:transform .12s ease}
 
 /* מתג */
 .sw{position:relative;width:42px;height:24px;flex:0 0 auto;cursor:pointer}
@@ -376,48 +379,50 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                 <div class="bsd" x-show="d.showBsd">בס"ד</div>
 
                 <div class="p-head">
-                  <div class="p-head-side" x-show="d.showPhoto"></div>
-                  <div class="p-head-main">
-                    <h1 class="p-title" x-text="d.synagogue"></h1>
-                    <div class="p-sub" x-show="d.subtitle.trim()" x-text="d.subtitle"></div>
-                    <div class="p-divider"><i></i><b>&#10022;</b><i></i></div>
-                  </div>
-                  <div class="p-head-side" x-show="d.showPhoto">
-                    <div class="p-portrait-frame">
-                      <div class="p-portrait" :style="`background-image:url('${photoSrc}')`"></div>
+                  <div class="p-head-row">
+                    <div class="p-head-side" x-show="d.showPhoto"></div>
+                    <div class="p-head-main">
+                      <h1 class="p-title" x-text="d.synagogue"></h1>
+                      <div class="p-sub" x-show="d.subtitle.trim()" x-text="d.subtitle"></div>
                     </div>
-                  </div>
-                </div>
-
-                <div class="p-meta" x-show="metaList.length">
-                  <template x-for="m in metaList" :key="m"><span x-text="m"></span></template>
-                </div>
-
-                <div class="p-rule"></div>
-
-                <div class="p-banner" x-show="d.banner.trim()" x-text="d.banner"></div>
-
-                <div class="p-sections" :class="d.layout==='grid' ? 'grid-2' : ''">
-                  <template x-for="s in visibleSections" :key="s.id">
-                    <div class="p-card">
-                      <div class="p-card-head" x-text="s.title"></div>
-                      <div class="p-card-body">
-                        <template x-for="it in s.items.filter(i=>i.enabled)" :key="it.id">
-                          <div class="p-row">
-                            <div class="p-time" :class="it.freeText ? 'txt' : ''" x-text="it.time || '—'"></div>
-                            <div class="p-dash">&#8211;</div>
-                            <div class="p-label">
-                              <span x-text="it.label"></span>
-                              <span class="p-note" x-show="it.note && it.note.trim()" x-text="it.note"></span>
-                            </div>
-                          </div>
-                        </template>
+                    <div class="p-head-side" x-show="d.showPhoto">
+                      <div class="p-portrait-frame">
+                        <div class="p-portrait" :style="`background-image:url('${photoSrc}')`"></div>
                       </div>
                     </div>
-                  </template>
+                  </div>
+
+                  <div class="p-meta" x-show="headLine">
+                    <template x-for="(m, i) in headLine" :key="m">
+                      <span><b x-show="i" >&#10022;</b><span x-text="m"></span></span>
+                    </template>
+                  </div>
+                  <div class="p-meta-2" x-show="d.extraMeta.trim()" x-text="d.extraMeta"></div>
+                  <div class="p-rule"></div>
+                  <div class="p-banner" x-show="d.banner.trim()" x-text="d.banner"></div>
                 </div>
 
-                <div class="p-rule"></div>
+                <div class="p-body">
+                  <div class="p-sections" :class="d.layout==='grid' ? 'grid-2' : ''">
+                    <template x-for="s in visibleSections" :key="s.id">
+                      <div class="p-card">
+                        <div class="p-card-head"><i></i><span x-text="s.title"></span><i></i></div>
+                        <div class="p-card-body">
+                          <template x-for="it in s.items.filter(i=>i.enabled)" :key="it.id">
+                            <div class="p-row">
+                              <div class="p-label">
+                                <span x-text="it.label"></span>
+                                <span class="p-note" x-show="it.note && it.note.trim()" x-text="it.note"></span>
+                              </div>
+                              <div class="p-dots"></div>
+                              <div class="p-time" :class="it.freeText ? 'txt' : ''" x-text="it.time || '—'"></div>
+                            </div>
+                          </template>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
 
                 <div class="p-foot">
                   <div class="p-blessing" x-show="d.blessing.trim()" x-text="d.blessing"></div>
@@ -447,8 +452,8 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
         <div x-show="tab==='times'">
           <div class="hint">
             סמנו במתג אילו תפילות יופיעו בלוח. לחיצה על השעה פותחת את בורר הזמנים,
-            ובתוכו אפשר גם להזין טקסט במקום שעה (למשל "בצאת השבת"). שורה חדשה
-            נוספת בסוף הקבוצה.
+            ובתוכו אפשר גם להזין טקסט במקום שעה (למשל "בצאת השבת").
+            לשינוי הסדר — גררו שורה בעזרת ידית הנקודות.
           </div>
 
           <template x-for="(s,si) in d.sections" :key="s.id">
@@ -480,6 +485,13 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                       <input class="inp note-inp" x-model="it.note" placeholder="הערה (לא חובה) — למשל: בעזרת הנשים">
                     </div>
                     <div class="item-tools">
+                      <button class="icon-btn grip" @pointerdown="startDrag($event, s)" title="גרירה לשינוי סדר">
+                        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                          <circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="6" r="1.7"/>
+                          <circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/>
+                          <circle cx="9" cy="18" r="1.7"/><circle cx="15" cy="18" r="1.7"/>
+                        </svg>
+                      </button>
                       <button class="icon-btn del" @click="s.items.splice(ii,1)" title="מחיקת השורה">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
                     </div>
@@ -891,11 +903,11 @@ let _uid = 0;
 const uid = () => 'i' + (++_uid) + Math.random().toString(36).slice(2, 6);
 
 const THEMES = {
-  royal:    { name:'כחול מלכותי', v:{ '--p-bg-1':'#111f45','--p-bg-2':'#050a19','--p-gold':'#dcb964','--p-gold-soft':'#f2dda9','--p-gold-deep':'#8a6a1c','--p-card':'#0a1330','--p-card-2':'#0e1a3d','--p-txt':'#eef2fb','--p-txt-soft':'#a3b0d0','--p-on-gold':'#1d1604','--p-meta-bg':'rgba(255,255,255,.05)','--p-meta-line':'rgba(220,185,100,.34)','--p-title-shadow':'0 1px 0 rgba(0,0,0,.5)' } },
-  emerald:  { name:'ירוק זית',    v:{ '--p-bg-1':'#0d3629','--p-bg-2':'#02120c','--p-gold':'#dcb964','--p-gold-soft':'#f1dca8','--p-gold-deep':'#7f5f16','--p-card':'#05201a','--p-card-2':'#092d24','--p-txt':'#ecf6f1','--p-txt-soft':'#9dbcae','--p-on-gold':'#14200d','--p-meta-bg':'rgba(255,255,255,.05)','--p-meta-line':'rgba(220,185,100,.32)','--p-title-shadow':'0 1px 0 rgba(0,0,0,.5)' } },
-  burgundy: { name:'בורדו מלכותי',v:{ '--p-bg-1':'#45101f','--p-bg-2':'#180409','--p-gold':'#debd6c','--p-gold-soft':'#f3e0af','--p-gold-deep':'#87621b','--p-card':'#270811','--p-card-2':'#350d19','--p-txt':'#fbeff1','--p-txt-soft':'#cba5ae','--p-on-gold':'#270910','--p-meta-bg':'rgba(255,255,255,.06)','--p-meta-line':'rgba(222,189,108,.34)','--p-title-shadow':'0 1px 0 rgba(0,0,0,.5)' } },
-  night:    { name:'שחור זהב',    v:{ '--p-bg-1':'#27241e','--p-bg-2':'#070605','--p-gold':'#d8b258','--p-gold-soft':'#f0dca4','--p-gold-deep':'#77590f','--p-card':'#13110e','--p-card-2':'#1d1a15','--p-txt':'#f4f0e7','--p-txt-soft':'#aca391','--p-on-gold':'#1a1305','--p-meta-bg':'rgba(255,255,255,.05)','--p-meta-line':'rgba(216,178,88,.32)','--p-title-shadow':'0 1px 0 rgba(0,0,0,.55)' } },
-  parchment:{ name:'קלף בהיר',    v:{ '--p-bg-1':'#fbf4e3','--p-bg-2':'#e9dcbc','--p-gold':'#93721b','--p-gold-soft':'#6d530c','--p-gold-deep':'#453305','--p-card':'#fffbf1','--p-card-2':'#f9f0da','--p-txt':'#2a2214','--p-txt-soft':'#6d5e44','--p-on-gold':'#fdf6e2','--p-meta-bg':'rgba(0,0,0,.03)','--p-meta-line':'rgba(147,114,27,.4)','--p-title-shadow':'0 1px 0 rgba(255,255,255,.6)' } }
+  royal:    { name:'ליל פליז',    v:{ '--p-bg-1':'#10203f','--p-bg-2':'#060b1c','--p-glow':'rgba(201,162,74,.14)','--p-gold':'#c9a24a','--p-gold-soft':'#f0dba6','--p-rule':'rgba(201,162,74,.26)','--p-mat':'#0b1730','--p-txt':'#eef1f8','--p-txt-soft':'#9aa8c6','--p-on-gold':'#1b1405','--p-title-shadow':'0 2px 0 rgba(0,0,0,.45)' } },
+  emerald:  { name:'ירוק זית',    v:{ '--p-bg-1':'#0d3428','--p-bg-2':'#03130d','--p-glow':'rgba(201,162,74,.13)','--p-gold':'#c9a24a','--p-gold-soft':'#efdba7','--p-rule':'rgba(201,162,74,.26)','--p-mat':'#07231a','--p-txt':'#ecf6f1','--p-txt-soft':'#9dbcae','--p-on-gold':'#14200d','--p-title-shadow':'0 2px 0 rgba(0,0,0,.45)' } },
+  burgundy: { name:'בורדו מלכותי',v:{ '--p-bg-1':'#41101e','--p-bg-2':'#170409','--p-glow':'rgba(201,162,74,.14)','--p-gold':'#cfa850','--p-gold-soft':'#f3e0af','--p-rule':'rgba(207,168,80,.26)','--p-mat':'#24080f','--p-txt':'#fbeff1','--p-txt-soft':'#cba5ae','--p-on-gold':'#270910','--p-title-shadow':'0 2px 0 rgba(0,0,0,.45)' } },
+  night:    { name:'שחור פליז',   v:{ '--p-bg-1':'#242019','--p-bg-2':'#070605','--p-glow':'rgba(201,162,74,.12)','--p-gold':'#c09a42','--p-gold-soft':'#efdba3','--p-rule':'rgba(192,154,66,.26)','--p-mat':'#14110c','--p-txt':'#f4f0e7','--p-txt-soft':'#aca391','--p-on-gold':'#1a1305','--p-title-shadow':'0 2px 0 rgba(0,0,0,.5)' } },
+  parchment:{ name:'קלף בהיר',    v:{ '--p-bg-1':'#fbf5e6','--p-bg-2':'#ece0c3','--p-glow':'rgba(120,92,20,.07)','--p-gold':'#8d6d18','--p-gold-soft':'#5f4a0c','--p-rule':'rgba(141,109,24,.32)','--p-mat':'#fffbf1','--p-txt':'#2a2214','--p-txt-soft':'#6d5e44','--p-on-gold':'#fdf6e2','--p-title-shadow':'0 1px 0 rgba(255,255,255,.65)' } }
 };
 
 function defaults(){
@@ -986,7 +998,7 @@ document.addEventListener('alpine:init', () => {
 
     /* ---------- נגזרות ---------- */
     get photoSrc(){ return this.d.photo || PORTRAIT; },
-    get metaList(){ return [this.d.parasha, this.d.hdate, this.d.extraMeta].map(s=>(s||'').trim()).filter(Boolean); },
+    get headLine(){ return [this.d.parasha, this.d.hdate].map(s=>(s||'').trim()).filter(Boolean); },
     get visibleSections(){ return this.d.sections.filter(s => s.enabled && s.items.some(i => i.enabled)); },
     get activeCount(){ return this.visibleSections.reduce((n,s)=>n + s.items.filter(i=>i.enabled).length, 0); },
 
@@ -1059,6 +1071,42 @@ document.addEventListener('alpine:init', () => {
       this.d.parasha = PARASHOT.includes(v) ? ('פרשת ' + v) : v;
       e.target.value = '';
     },
+    /* גרירת שורה לשינוי סדר — עובד באצבע ובעכבר */
+    startDrag(e, sec){
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      const row = e.target.closest('.item');
+      const list = row.parentElement;
+      if (!row || !list) return;
+      e.preventDefault();
+      const rows = [...list.querySelectorAll('.item')];
+      const height = rows.length > 1 ? (rows[1].getBoundingClientRect().top - rows[0].getBoundingClientRect().top)
+                                     : row.offsetHeight;
+      let from = rows.indexOf(row);
+      row.classList.add('dragging');
+      list.classList.add('dragging-list');
+      try { e.target.setPointerCapture(e.pointerId); } catch(err){}
+
+      const move = (ev) => {
+        const first = list.querySelector('.item');
+        if (!first || !height) return;
+        const top = first.getBoundingClientRect().top;
+        let to = Math.round((ev.clientY - top - height / 2) / height);
+        to = Math.max(0, Math.min(sec.items.length - 1, to));
+        if (to !== from){
+          const [moved] = sec.items.splice(from, 1);
+          sec.items.splice(to, 0, moved);
+          from = to;
+        }
+      };
+      const end = () => {
+        window.removeEventListener('pointermove', move);
+        list.classList.remove('dragging-list');
+        list.querySelectorAll('.item.dragging').forEach(el => el.classList.remove('dragging'));
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', end, { once:true });
+      window.addEventListener('pointercancel', end, { once:true });
+    },
     addItem(s){ s.items.push({ id:uid(), label:'תפילה חדשה', time:'18:00', note:'', enabled:true, freeText:false }); },
     addSection(){ this.d.sections.push({ id:uid(), title:'קבוצה חדשה', enabled:true, items:[
       { id:uid(), label:'זמן חדש', time:'18:00', note:'', enabled:true, freeText:false }]}); },
@@ -1119,7 +1167,7 @@ document.addEventListener('alpine:init', () => {
       if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch(e){} }
       const node = document.getElementById('poster');
       return await html2canvas(node, {
-        scale: 2,
+        scale: 1.5,
         backgroundColor: (THEMES[this.d.theme]||THEMES.royal).v['--p-bg-2'],
         useCORS: true,
         logging: false,
@@ -1174,7 +1222,7 @@ document.addEventListener('alpine:init', () => {
     shareText(){
       const parts = [this.d.synagogue];
       if (this.d.subtitle.trim()) parts.push(this.d.subtitle.trim());
-      const meta = this.metaList.join(' · ');
+      const meta = this.headLine.join(' · ');
       return parts.join(' — ') + (meta ? '\n' + meta : '') + '\nזמני התפילות המצורפים. ' + (this.d.blessing || '');
     },
     /* התמונה מוכנה מראש ברקע, כדי שהתצוגה המקדימה והשיתוף ייפתחו מיד */
