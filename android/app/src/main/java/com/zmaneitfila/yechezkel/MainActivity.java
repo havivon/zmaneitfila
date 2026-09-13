@@ -34,6 +34,12 @@ public class MainActivity extends Activity {
         s.setSupportZoom(false);
         s.setBuiltInZoomControls(false);
 
+        /* לחיצה ארוכה בעמוד מיועדת לגרירת שורות, ולכן מחוות בחירת הטקסט
+           של ה‑WebView מנוטרלת. עריכה והקלדה אינן מושפעות. */
+        web.setLongClickable(false);
+        web.setHapticFeedbackEnabled(false);
+        web.setOnLongClickListener(v -> true);
+
         web.setWebViewClient(new WebViewClient());
         web.setWebChromeClient(new WebChromeClient() {
             @Override

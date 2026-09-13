@@ -134,10 +134,10 @@ button{font-family:inherit}
 
 /* ---- ראש הלוח: קשת ארון הקודש ---- */
 .p-head{position:relative;padding-top:2px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='540' height='208' viewBox='0 0 540 208'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23c9a24a' stop-opacity='.9'/%3E%3Cstop offset='.55' stop-color='%23c9a24a' stop-opacity='.35'/%3E%3Cstop offset='1' stop-color='%23c9a24a' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23f)' stroke-width='1.6'%3E%3Cpath d='M14 208V104C14 44 124 14 270 14s256 30 256 90v104'/%3E%3Cpath d='M27 208V110C27 55 132 28 270 28s243 27 243 82v98'/%3E%3C/g%3E%3Cpath d='M270 1L262 15L278 15ZM270 20L262 6L278 6Z' fill='%23c9a24a'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='540' height='256' viewBox='0 0 540 256'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23c9a24a' stop-opacity='.9'/%3E%3Cstop offset='.55' stop-color='%23c9a24a' stop-opacity='.35'/%3E%3Cstop offset='1' stop-color='%23c9a24a' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23f)' stroke-width='1.6'%3E%3Cpath d='M14 256V152C14 92 124 62 270 62s256 30 256 90v104'/%3E%3Cpath d='M27 256V158C27 103 132 76 270 76s243 27 243 82v98'/%3E%3C/g%3E%3Cpath d='M270 2L247.5 41L292.5 41ZM270 54L247.5 15L292.5 15Z' fill='%23c9a24a'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:center top;
 }
-.p-head-row{display:flex;align-items:center;gap:20px;padding-top:54px}   /* הכותרת יושבת בתוך הקשת */
+.p-head-row{display:flex;align-items:center;gap:20px;padding-top:102px}   /* הכותרת יושבת בתוך הקשת */
 .p-head-side{flex:0 0 92px;width:92px}
 .p-head-main{flex:1;min-width:0;text-align:center}
 .p-portrait-frame{width:92px;padding:4px;border:1px solid var(--p-gold);background:var(--p-mat)}
@@ -300,6 +300,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
    ניתן לבחירה ברגע שהוא במוקד, כדי שעריכת טקסט תעבוד כרגיל. */
 .item input,.item button.inp-time{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .item input:focus{user-select:text;-webkit-user-select:text}
+.item.pressing,.item.pressing *{user-select:none!important;-webkit-user-select:none!important}
 
 
 /* מתג */
@@ -1179,8 +1180,10 @@ document.addEventListener('alpine:init', () => {
       const veto = (ev) => ev.preventDefault();
       document.addEventListener('selectstart', veto);
       document.addEventListener('contextmenu', veto);
+      row.classList.add('pressing');
       const stop = () => {
         clearTimeout(this._pressTimer);
+        row.classList.remove('pressing');
         document.removeEventListener('selectstart', veto);
         document.removeEventListener('contextmenu', veto);
         window.removeEventListener('pointermove', watch);
