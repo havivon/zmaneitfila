@@ -239,6 +239,11 @@ button.inp-time:hover{border-color:rgba(232,196,106,.5);background:rgba(232,196,
 .tab:hover{color:var(--txt);background:rgba(255,255,255,.05)}
 .tab.on{background:linear-gradient(145deg,rgba(232,196,106,.2),rgba(232,196,106,.07));color:var(--gold-soft);
   box-shadow:inset 0 0 0 1px rgba(232,196,106,.3)}
+.upd{display:flex;align-items:center;gap:10px;padding:11px 14px;
+  background:linear-gradient(180deg,rgba(232,196,106,.16),rgba(232,196,106,.07));
+  border-bottom:1px solid rgba(232,196,106,.3)}
+.upd-txt{flex:1;font-size:13.5px;color:var(--gold-soft);font-weight:600}
+.upd-txt b{color:#fff;font-weight:800}
 .panel-body{padding:16px;max-height:calc(100vh - 190px);overflow-y:auto}
 @media(max-width:1080px){.panel-body{max-height:none}}
 
@@ -459,6 +464,24 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
         <button class="tab" :class="tab==='style'&&'on'" @click="tab='style'">עיצוב ותמונה</button>
       </nav>
 
+      <div class="upd" x-show="upd.state && upd.state !== 'latest'" x-transition.opacity>
+        <div class="upd-txt">
+          <template x-if="upd.state === 'available'">
+            <span>גרסה <b x-text="upd.version"></b> זמינה להתקנה</span>
+          </template>
+          <template x-if="upd.state === 'checking'"><span>בודק אם יש עדכון…</span></template>
+          <template x-if="upd.state === 'progress'">
+            <span>מוריד את העדכון… <b x-text="upd.percent + '%'"></b></span>
+          </template>
+          <template x-if="upd.state === 'installing'"><span>פותח את מסך ההתקנה…</span></template>
+          <template x-if="upd.state === 'error'"><span>לא הצלחתי לבדוק עדכון</span></template>
+        </div>
+        <button class="btn btn-gold btn-sm" x-show="upd.state === 'available'" @click="installUpdate()">עדכן עכשיו</button>
+        <button class="icon-btn" @click="upd.state=''" title="סגירה">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
       <div class="panel-body">
 
         <!-- ---- זמני התפילות ---- -->
@@ -623,8 +646,9 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
           </div>
           <div class="hint" style="margin-top:14px">
             כל הנתונים נשמרים במכשיר של מנהל בית הכנסת בלבד. לשיתוף הלוח עם הגבאים — השתמשו בגיבוי לקובץ.
-            <span x-show="appVersion" style="display:block;margin-top:6px;color:var(--gold-soft)">
-              גרסת האפליקציה: <span x-text="appVersion"></span>
+            <span x-show="appVersion" style="display:flex;align-items:center;gap:10px;margin-top:8px;color:var(--gold-soft)">
+              <span>גרסת האפליקציה: <span x-text="appVersion"></span></span>
+              <button class="btn btn-sm btn-ghost" style="padding:5px 10px" @click="checkUpdate(false)">בדיקת עדכון</button>
             </span>
           </div>
         </div>
@@ -976,6 +1000,7 @@ document.addEventListener('alpine:init', () => {
     _cache:null,       /* {rev, blob} — התמונה שכבר הוכנה */
     tp:{ open:false, item:null, h:18, m:0, text:'' },
     appVersion:'',
+    upd:{ state:'', version:'', percent:0 },
     parashot:PARASHOT,
     shabbatot:SHABBATOT,
 
@@ -998,6 +1023,22 @@ document.addEventListener('alpine:init', () => {
       this.$nextTick(()=>this.fit());
       window.addEventListener('resize', ()=>this.fit());
       if (NATIVE && NATIVE.appVersion) this.appVersion = NATIVE.appVersion();
+      /* עדכוני האפליקציה: תשובות מגיעות מצד האנדרואיד אל window.__update */
+      window.__update = (state, version, percent, quiet) => {
+        /* בדיקה שמסתיימת באיחור לא תדרוס הורדה או התקנה שכבר בעיצומן */
+        if (['progress','installing'].includes(this.upd.state) &&
+            ['available','latest','error'].includes(state)) return;
+        if (state === 'latest' && !quiet) this.toast('האפליקציה מעודכנת');
+        if (state === 'error'  && quiet)  return;
+        this.upd = { state, version, percent };
+      };
+      if (NATIVE && NATIVE.checkUpdate){
+        const last = +(localStorage.getItem('upd-check') || 0);
+        if (Date.now() - last > 20 * 3600 * 1000){
+          localStorage.setItem('upd-check', String(Date.now()));
+          setTimeout(() => NATIVE.checkUpdate(true), 2500);   /* שקט, אחרי שהעמוד נטען */
+        }
+      }
       /* מקש החזרה של אנדרואיד: סוגר קודם חלון פתוח */
       window.__closeTopLayer = () => {
         if (this.tp.open){ this.tp.open = false; return true; }
@@ -1016,6 +1057,18 @@ document.addEventListener('alpine:init', () => {
     get activeCount(){ return this.visibleSections.reduce((n,s)=>n + s.items.filter(i=>i.enabled).length, 0); },
 
     /* ---------- עריכה ---------- */
+    /* ---------- עדכון האפליקציה ---------- */
+    checkUpdate(quiet){
+      if (!NATIVE || !NATIVE.checkUpdate){ this.toast('בדיקת עדכון זמינה באפליקציה בלבד'); return; }
+      this.upd = { state:'checking', version:'', percent:0 };
+      NATIVE.checkUpdate(!!quiet);
+    },
+    installUpdate(){
+      if (!NATIVE || !NATIVE.installUpdate) return;
+      this.upd = { state:'progress', version:this.upd.version, percent:0 };
+      NATIVE.installUpdate();
+    },
+
     /* ---------- בורר השעות (גלגלים) ---------- */
     pad(n){ return String(n).padStart(2,'0'); },
     openTime(it){

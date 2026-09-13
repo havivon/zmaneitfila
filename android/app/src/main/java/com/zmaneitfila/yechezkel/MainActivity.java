@@ -56,6 +56,13 @@ public class MainActivity extends Activity {
         setContentView(web);
     }
 
+    /** מאפשר לצד האנדרואיד לדווח לעמוד על מצב העדכון. */
+    void postToWeb(final String js) {
+        runOnUiThread(() -> {
+            if (web != null) web.evaluateJavascript(js, null);
+        });
+    }
+
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
         if (request == FILE_CHOOSER_REQUEST) {
