@@ -1247,6 +1247,10 @@ document.addEventListener('alpine:init', () => {
         row.classList.remove('dragging');
         list.classList.remove('dragging-list');
         document.body.classList.remove('no-select');
+        /* בולעים את הלחיצה שמגיעה בסוף הגרירה, כדי שבורר השעה לא ייפתח */
+        const swallow = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
+        row.addEventListener('click', swallow, true);
+        setTimeout(() => row.removeEventListener('click', swallow, true), 400);
         if (to !== from){
           const [moved] = sec.items.splice(from, 1);
           sec.items.splice(to, 0, moved);
