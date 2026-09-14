@@ -75,6 +75,7 @@ button{font-family:inherit}
 .share-pair{display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1 1 300px}
 .share-pair .btn{width:100%;justify-content:center}
 
+
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line-soft);
   background:rgba(255,255,255,.05);color:var(--txt);padding:10px 15px;border-radius:12px;font-size:14px;
   font-weight:600;cursor:pointer;transition:.18s ease;white-space:nowrap}
@@ -103,6 +104,7 @@ button{font-family:inherit}
   background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.012));
   box-shadow:0 30px 60px -40px #000}
 .stage-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.stage-head .btn{margin-inline-start:auto}
 .stage-title{font-size:13px;letter-spacing:.6px;color:var(--muted);font-weight:700}
 .chip{font-size:11.5px;padding:4px 10px;border-radius:999px;background:rgba(232,196,106,.12);
   color:var(--gold-soft);border:1px solid rgba(232,196,106,.22);font-weight:600}
@@ -311,6 +313,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .group-head input.title-inp{flex:1;min-width:0;background:transparent;border:0;color:var(--gold-soft);
   font-size:15.5px;font-weight:800;font-family:'Frank Ruhl Libre',serif;padding:3px 4px;border-radius:7px}
 .group-head input.title-inp:focus{outline:0;background:rgba(0,0,0,.35)}
+.group-fold{transition:height .28s cubic-bezier(.3,.8,.35,1)}
 .group-body{padding:8px 10px 12px}
 /* קבוצה מכובה — הזמנים שבתוכה אפורים ואינם ניתנים ללחיצה,
    אך מצב המתג של כל זמן נשמר ונשאר גלוי.                      */
@@ -416,10 +419,6 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
       </div>
     </div>
     <div class="topbar-actions">
-      <button class="btn btn-gold btn-sm" @click="openPreview()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
-        <span>תצוגה מקדימה</span>
-      </button>
       <div class="share-pair">
         <button class="btn btn-wa" @click="shareWhatsApp()">
           <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m0 1.67c2.2 0 4.27.86 5.82 2.42a8.2 8.2 0 0 1 2.42 5.83c0 4.54-3.7 8.23-8.24 8.23a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24M8.53 7.33c-.16 0-.43.06-.65.31-.22.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.74 2.78 4.23 3.79.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29-.24-.12-1.46-.72-1.69-.8-.22-.09-.39-.13-.55.12-.17.25-.63.79-.77.95-.14.17-.28.19-.53.07-.24-.13-1.04-.39-1.99-1.23-.73-.65-1.23-1.46-1.37-1.71-.14-.24-.02-.37.11-.5.11-.11.24-.28.37-.42.12-.15.16-.25.24-.41.08-.17.04-.31-.02-.43-.06-.12-.55-1.34-.76-1.84-.2-.48-.4-.42-.55-.42z"/></svg>
@@ -442,6 +441,10 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
           <span class="stage-title">תצוגה מקדימה חיה</span>
           <span class="chip" x-text="activeCount + ' זמנים מוצגים'"></span>
           <span class="chip" style="background:rgba(91,176,255,.12);border-color:rgba(91,176,255,.25);color:#a9d4ff">נשמר אוטומטית</span>
+          <button class="btn btn-gold btn-sm" @click="openPreview()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>תצוגה מקדימה</span>
+          </button>
         </div>
         <div class="poster-stage" id="posterStage">
           <div class="poster-scaler" id="posterScaler">
@@ -578,6 +581,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
                 </div>
               </div>
+              <div class="group-fold" x-effect="foldGroup($el, s.enabled)">
               <div class="group-body" :class="!s.enabled && 'locked'" :inert="!s.enabled">
                 <template x-for="(it,ii) in s.items" :key="it.id">
                   <div class="item" :class="!it.enabled && 'off'" @pointerdown="pressRow($event, s)">
@@ -601,6 +605,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg>
                   הוסף זמן לקבוצה זו
                 </button>
+              </div>
               </div>
             </div>
           </template>
@@ -1322,6 +1327,25 @@ document.addEventListener('alpine:init', () => {
       const name = this.d.sections[i] ? this.d.sections[i].title : 'הקבוצה';
       this.askThen('מחיקת קבוצה', 'למחוק את "' + name + '" ואת כל הזמנים שבה?', 'מחיקה',
                    () => this.d.sections.splice(i,1));
+    },
+    /* קיפול גוף הקבוצה בעת כיבוי המתג, ופתיחתו בעת הדלקתו.
+       הגובה מונפש מערך מפורש ולא מ-auto, שאינו ניתן להנפשה.       */
+    foldGroup(el, open){
+      if (!el) return;
+      if (el.dataset.ready !== '1') {          /* מצב התחלתי — בלי אנימציה */
+        el.dataset.ready = '1';
+        el.style.height = open ? 'auto' : '0px';
+        el.style.overflow = open ? '' : 'hidden';
+        return;
+      }
+      clearTimeout(el._fold);
+      el.style.overflow = 'hidden';
+      el.style.height = el.offsetHeight + 'px';
+      void el.offsetHeight;                    /* reflow, כדי שהמעבר יתחיל מהערך הזה */
+      el.style.height = (open ? el.scrollHeight : 0) + 'px';
+      el._fold = setTimeout(() => {
+        if (open) { el.style.height = 'auto'; el.style.overflow = ''; }
+      }, 300);
     },
     moveSection(i,dir){ const j=i+dir; if(j<0||j>=this.d.sections.length) return;
       const a=this.d.sections; [a[i],a[j]]=[a[j],a[i]]; },
