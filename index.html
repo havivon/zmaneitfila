@@ -314,6 +314,11 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
   font-size:15.5px;font-weight:800;font-family:'Frank Ruhl Libre',serif;padding:3px 4px;border-radius:7px}
 .group-head input.title-inp:focus{outline:0;background:rgba(0,0,0,.35)}
 .group-body{padding:8px 10px 12px}
+/* קבוצה מכובה — הזמנים שבתוכה אפורים ואינם ניתנים ללחיצה,
+   אך מצב המתג של כל זמן נשמר ונשאר גלוי.                      */
+.group-body.locked{filter:grayscale(1);opacity:.5;pointer-events:none;user-select:none}
+.group-body.locked .item.off{opacity:.65}
+.group-body.locked .item:hover{background:transparent;border-color:transparent}
 
 .item{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;padding:8px;border-radius:12px;
   border:1px solid transparent;transition:.16s}
@@ -575,7 +580,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
                 </div>
               </div>
-              <div class="group-body">
+              <div class="group-body" :class="!s.enabled && 'locked'" :inert="!s.enabled">
                 <template x-for="(it,ii) in s.items" :key="it.id">
                   <div class="item" :class="!it.enabled && 'off'" @pointerdown="pressRow($event, s)">
                     <label class="sw"><input type="checkbox" x-model="it.enabled"><i></i></label>
