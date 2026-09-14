@@ -22,17 +22,20 @@
   --gold-deep:#a97f24;
   --accent:#5bb0ff;
   /* ערכת הלוח — נשלטת ע"י המנהל */
-  --p-bg-1:#10203f;
-  --p-bg-2:#060b1c;
-  --p-glow:rgba(201,162,74,.14);
+  --p-edge-1:#16305a;
+  --p-edge-2:#0c1c36;
+  --p-edge-glow:rgba(216,174,82,.16);
+  --p-panel-1:#fdf8ec;
+  --p-panel-2:#f2e7cd;
+  --p-ink:#15305a;
+  --p-ink-soft:#6b6450;
+  --p-time:#9a6b1f;
+  --p-rule:rgba(176,138,44,.34);
+  --p-mat:#fffdf6;
   --p-gold:#c9a24a;
-  --p-gold-soft:#f0dba6;
-  --p-rule:rgba(201,162,74,.26);
-  --p-mat:#0b1730;
-  --p-txt:#eef1f8;
-  --p-txt-soft:#9aa8c6;
-  --p-on-gold:#1b1405;
-  --p-title-shadow:0 2px 0 rgba(0,0,0,.45);
+  --p-gold-soft:#e8c87e;
+  --p-gold-deep:#9a7522;
+  --p-on-gold:#231703;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -107,90 +110,126 @@ button{font-family:inherit}
 .poster-scaler{transform-origin:top center;transition:transform .15s ease}
 
 /* ============ הלוח ============
-   ערכת "פרוכת": ליל עמוק ופליז. הקשת שבראש והעיטורים שבפינות נגזרים
-   מארון הקודש, והשורות בנויות כלוח מודפס — שם, קו נקודות ושעה.
-   הפרופורציה 9:16 כדי שהתמונה תמלא מסך טלפון בשיתוף.               */
+   מסגרת כחולה עם עיטורי פינה מוזהבים, ובתוכה פאנל קלף שראשו מקושת
+   כפתח ארון קודש. הכיתוב כחול, השעות בברונזה, והמפרידים מוזהבים.   */
 .poster{
   width:720px;min-height:1280px;position:relative;overflow:hidden;
   display:flex;flex-direction:column;
-  padding:26px;
-  font-family:'Heebo',Arial,sans-serif;color:var(--p-txt);
-  background-color:var(--p-bg-2);
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='58' height='58' viewBox='0 0 58 58'%3E%3Cg fill='none' stroke='%23c9a24a' stroke-width='1' opacity='.07'%3E%3Crect x='19' y='19' width='20' height='20'/%3E%3Crect x='19' y='19' width='20' height='20' transform='rotate(45 29 29)'/%3E%3C/g%3E%3C/svg%3E"),
-    radial-gradient(120% 60% at 50% 0%, var(--p-glow), transparent 62%),
-    linear-gradient(176deg, var(--p-bg-1) 0%, var(--p-bg-2) 58%, var(--p-bg-1) 100%);
-  background-repeat:repeat, no-repeat, no-repeat;
+  padding:92px 30px 34px;
+  font-family:'Heebo',Arial,sans-serif;color:var(--p-ink);
+  background:
+    radial-gradient(120% 55% at 50% 0%, var(--p-edge-glow), transparent 60%),
+    linear-gradient(170deg, var(--p-edge-1) 0%, var(--p-edge-2) 55%, var(--p-edge-1) 100%);
 }
+/* מגן דוד בראש, מעל הקשת */
+.p-star{position:absolute;top:14px;left:0;right:0;height:68px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='68' height='68' viewBox='0 0 48 48'%3E%3Cpath d='M24 2L4.2 36h39.6ZM24 46L4.2 12h39.6Z' fill='none' stroke='%23d8ae52' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center}
+/* עיטורי הפינות */
+.p-corner{position:absolute;width:62px;height:62px;background-repeat:no-repeat;background-size:100% 100%}
+.p-corner.tl{top:10px;left:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='30' cy='12' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
+.p-corner.tr{top:10px;right:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8' transform='translate(62 0) scale(-1 1)'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='32' cy='12' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
+.p-corner.bl{bottom:10px;left:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8' transform='translate(0 62) scale(1 -1)'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='30' cy='50' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
+.p-corner.br{bottom:10px;right:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8' transform='translate(62 62) scale(-1 -1)'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='32' cy='50' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
+
+/* הפאנל הפנימי, שראשו מקושת */
 .poster-frame{
   flex:1;display:flex;flex-direction:column;position:relative;
+  background:linear-gradient(180deg,var(--p-panel-1),var(--p-panel-2));
   border:2px solid var(--p-gold);
-  padding:30px 34px 26px;
+  border-radius:200px 200px 14px 14px;
+  padding:22px 40px 30px;
 }
-.poster-frame::before{                       /* קו פנימי דק, כמו מסגרת מודפסת */
-  content:"";position:absolute;inset:7px;border:1px solid var(--p-rule);pointer-events:none}
-.bsd{position:absolute;top:16px;right:20px;font-size:12.5px;color:var(--p-gold);opacity:.85;
-  font-family:'Frank Ruhl Libre',serif;letter-spacing:.6px;z-index:2}
+.poster-frame::before{content:"";position:absolute;inset:7px;pointer-events:none;
+  border:1px solid var(--p-rule);border-radius:194px 194px 9px 9px}
+.bsd{position:absolute;top:-58px;right:74px;white-space:nowrap;font-size:15px;color:var(--p-gold);
+  font-family:'Frank Ruhl Libre',serif;letter-spacing:.6px}
 
-/* ---- ראש הלוח: קשת ארון הקודש ---- */
-.p-head{position:relative;padding-top:2px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='540' height='256' viewBox='0 0 540 256'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23c9a24a' stop-opacity='.9'/%3E%3Cstop offset='.55' stop-color='%23c9a24a' stop-opacity='.35'/%3E%3Cstop offset='1' stop-color='%23c9a24a' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23f)' stroke-width='1.6'%3E%3Cpath d='M14 256V152C14 92 124 62 270 62s256 30 256 90v104'/%3E%3Cpath d='M27 256V158C27 103 132 76 270 76s243 27 243 82v98'/%3E%3C/g%3E%3Cpath d='M270 2L247.5 41L292.5 41ZM270 54L247.5 15L292.5 15Z' fill='%23c9a24a'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:center top;
-}
-.p-head-row{display:flex;align-items:center;gap:20px;padding-top:102px}   /* הכותרת יושבת בתוך הקשת */
+/* ---- ראש הלוח ---- */
+.p-head{position:relative;padding-top:8px}
+.p-crown{height:30px;margin:0 auto 14px;max-width:280px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='30' viewBox='0 0 280 30'%3E%3Cg fill='none' stroke='%23c9a24a' stroke-width='1.7'%3E%3Cpath d='M12 24c26 0 40-16 66-16 12 0 20 5 24 11'/%3E%3Cpath d='M268 24c-26 0-40-16-66-16-12 0-20 5-24 11'/%3E%3Cpath d='M112 20c7 0 12-4 12-10'/%3E%3Cpath d='M168 20c-7 0-12-4-12-10'/%3E%3C/g%3E%3Cpath d='M140 13l6 7-6 7-6-7z' fill='%23c9a24a'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center}
+.p-head-row{display:flex;align-items:center;gap:18px;margin-top:18px}
 .p-head-side{flex:0 0 92px;width:92px}
 .p-head-main{flex:1;min-width:0;text-align:center}
-.p-portrait-frame{width:92px;padding:4px;border:1px solid var(--p-gold);background:var(--p-mat)}
-.p-portrait{width:82px;height:106px;background-size:cover;background-position:center top;background-color:#d8d0bf}
-.p-title{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:52px;line-height:1.1;
-  color:var(--p-gold-soft);letter-spacing:-.5px;text-shadow:var(--p-title-shadow)}
-.p-sub{font-size:16px;color:var(--p-gold);font-weight:300;margin-top:10px;letter-spacing:5px}
-.p-meta{margin-top:16px;text-align:center;font-size:17px;color:var(--p-txt);font-weight:400;letter-spacing:.3px}
-.p-meta b{color:var(--p-gold);font-weight:400;padding:0 9px;font-size:11px;vertical-align:2px}
-.p-meta-2{margin-top:5px;text-align:center;font-size:14px;color:var(--p-txt-soft);font-weight:300;letter-spacing:.2px}
-.p-rule{height:1px;margin-top:20px;
-  background:linear-gradient(90deg,transparent,var(--p-gold) 20%,var(--p-gold) 80%,transparent);opacity:.55}
+.p-portrait-frame{width:92px;padding:4px;border:1.5px solid var(--p-gold);background:var(--p-mat)}
+.p-portrait{width:81px;height:104px;background-size:cover;background-position:center top;background-color:#d8d0bf}
+.p-title{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:48px;line-height:1.14;
+  color:var(--p-ink);letter-spacing:-.5px;text-align:center;padding:0 26px}
+.p-sub{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px}
+.p-sub i{flex:1;max-width:78px;height:12px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='78' height='12' viewBox='0 0 78 12'%3E%3Cpath d='M0 6h58' stroke='%23c9a24a' stroke-width='1.4'/%3E%3Cpath d='M68 1l6 5-6 5-6-5z' fill='%23c9a24a'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center}
+.p-sub i.flip{transform:scaleX(-1)}
+.p-sub span{font-family:'Frank Ruhl Libre',serif;font-size:25px;font-weight:700;color:var(--p-ink);
+  letter-spacing:.5px;white-space:nowrap}
+.p-meta{text-align:center;font-size:19px;color:var(--p-ink);font-weight:500;letter-spacing:.2px;line-height:1.6}
+.p-meta b{display:inline-block;width:11px;height:10px;margin:0 10px;vertical-align:1px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='10' viewBox='0 0 11 10'%3E%3Cpath d='M5.5 0l5 5-5 5-5-5z' fill='%23c9a24a'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center}
+.p-meta-2{margin-top:5px;text-align:center;font-size:15px;color:var(--p-ink-soft);font-weight:400}
 
-.p-banner{margin-top:18px;text-align:center;font-size:16px;font-weight:500;color:var(--p-on-gold);
-  background:linear-gradient(180deg,var(--p-gold-soft),var(--p-gold));padding:10px 16px;letter-spacing:.3px}
+.p-banner{margin-top:18px;text-align:center;font-size:19px;font-weight:700;color:var(--p-on-gold);
+  background:linear-gradient(180deg,var(--p-gold-soft),var(--p-gold));
+  border:1px solid var(--p-gold-deep);border-radius:7px;padding:11px 16px;letter-spacing:.2px}
 
 /* ---- גוף הלוח ---- */
-.p-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:30px;padding:18px 0}
-.p-sections{display:grid;gap:34px}
-.p-sections.grid-2{grid-template-columns:1fr 1fr;gap:20px;align-items:start}
-.p-card-head{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px}
-.p-card-head i{flex:1;height:1px;background:var(--p-gold);opacity:.5}
-.p-card-head span{font-family:'Frank Ruhl Libre',serif;font-weight:700;font-size:25px;color:var(--p-gold-soft);
-  letter-spacing:1px;white-space:nowrap}
-.p-card-body{padding:2px 6px}
-.p-row{display:flex;align-items:baseline;gap:12px;padding:17px 4px;border-bottom:1px solid var(--p-rule)}
+.p-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:12px 0}
+.p-sections{display:grid;gap:26px}
+.p-sections.grid-2{grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.p-card-head{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px}
+.p-card-head i{flex:1;height:12px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='12' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M0 6h104' stroke='%23c9a24a' stroke-width='1.3'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center;background-size:100% 12px}
+.p-card-head b{flex:0 0 auto;width:13px;height:12px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='12' viewBox='0 0 13 12'%3E%3Cpath d='M6.5 0l6 6-6 6-6-6z' fill='%23c9a24a'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center}
+.p-card-head span{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:27px;color:var(--p-ink);
+  letter-spacing:.4px;white-space:nowrap}
+.p-card-body{padding:0 2px}
+.p-row{display:flex;align-items:baseline;gap:12px;padding:12px 6px;border-bottom:1px solid var(--p-rule)}
 .p-row:last-child{border-bottom:0}
-.p-label{font-size:32px;font-weight:400;color:var(--p-txt);line-height:1.25;flex:0 0 auto;max-width:64%}
-.p-note{display:block;font-size:15px;color:var(--p-txt-soft);font-weight:300;margin-top:3px;letter-spacing:.2px}
-.p-dots{flex:1;height:10px;min-width:16px;opacity:.55;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='10' viewBox='0 0 9 10'%3E%3Ccircle cx='4.5' cy='6' r='1.15' fill='%23c9a24a'/%3E%3C/svg%3E");
+.p-label{font-size:30px;font-weight:700;color:var(--p-ink);line-height:1.2;flex:0 1 auto;min-width:0;max-width:66%}
+.p-note{display:block;font-size:14px;color:var(--p-ink-soft);font-weight:400;margin-top:4px}
+.p-dots{flex:1;height:10px;min-width:16px;opacity:.75;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='10' viewBox='0 0 9 10'%3E%3Ccircle cx='4.5' cy='6' r='1.15' fill='%23b08a2c'/%3E%3C/svg%3E");
   background-repeat:repeat-x;background-position:right center}
-.p-time{font-family:'Frank Ruhl Libre',serif;font-weight:700;font-size:34px;color:var(--p-gold-soft);
+.p-time{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:38px;color:var(--p-time);
   letter-spacing:.5px;flex:0 0 auto;font-variant-numeric:tabular-nums}
-.p-time.txt{font-size:19px;font-weight:700}
+.p-time.txt{font-size:21px;font-weight:700}
+/* בפריסת שתי עמודות יש פחות רוחב — הטיפוגרפיה מוקטנת בהתאם */
+.p-sections.grid-2 .p-card-head{gap:9px;margin-bottom:4px}
+.p-sections.grid-2 .p-card-head span{font-size:21px}
+.p-sections.grid-2 .p-row{padding:10px 2px;gap:8px}
+.p-sections.grid-2 .p-label{font-size:21px;max-width:62%}
+.p-sections.grid-2 .p-note{font-size:12px;margin-top:2px}
+.p-sections.grid-2 .p-time{font-size:27px}
+.p-sections.grid-2 .p-time.txt{font-size:16px}
+.p-sections.grid-2 .p-dots{min-width:10px}
 
 /* ---- הודעות ---- */
-.p-notes{padding:2px 8px}
+.p-notes{padding:0 4px}
 .p-notes-head{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px}
-.p-notes-head i{flex:1;height:1px;background:var(--p-gold);opacity:.4}
-.p-notes-head span{font-family:'Frank Ruhl Libre',serif;font-weight:700;font-size:20px;color:var(--p-gold);
-  letter-spacing:2px;white-space:nowrap}
+.p-notes-head i{flex:1;height:12px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='12' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M0 6h104' stroke='%23c9a24a' stroke-width='1.3'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center;background-size:100% 12px}
+.p-notes-head b{flex:0 0 auto;width:13px;height:12px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='12' viewBox='0 0 13 12'%3E%3Cpath d='M6.5 0l6 6-6 6-6-6z' fill='%23c9a24a'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center}
+.p-notes-head span{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:22px;color:var(--p-ink);letter-spacing:1px}
 .p-notes-body{white-space:pre-line;text-align:center;font-size:19px;line-height:1.7;
-  color:var(--p-txt);font-weight:300;letter-spacing:.2px}
+  color:var(--p-ink);font-weight:400}
 
 /* ---- רגל הלוח ---- */
-.p-foot{text-align:center;padding-top:4px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='26' viewBox='0 0 300 26'%3E%3Cg fill='none' stroke='%23c9a24a' stroke-width='1.4' opacity='.75'%3E%3Cpath d='M6 13c40 0 60-9 92-9 20 0 34 5 44 9'/%3E%3Cpath d='M294 13c-40 0-60-9-92-9-20 0-34 5-44 9'/%3E%3C/g%3E%3Cpath d='M150 4L142.5 17L157.5 17ZM150 22L142.5 9L157.5 9Z' fill='%23c9a24a'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:center top}
-.p-blessing{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:40px;color:var(--p-gold-soft);
-  letter-spacing:2px;margin-top:30px;text-shadow:var(--p-title-shadow)}
-.p-ded{margin-top:12px;font-size:14.5px;color:var(--p-txt-soft);font-weight:300;line-height:1.6}
-.p-addr{margin-top:8px;font-size:15px;color:var(--p-gold);font-weight:400;letter-spacing:.6px}
+.p-foot{text-align:center;padding-top:6px}
+.p-foot-orn{height:26px;margin:0 auto 8px;max-width:230px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='230' height='26' viewBox='0 0 230 26'%3E%3Cg fill='none' stroke='%23c9a24a' stroke-width='1.5'%3E%3Cpath d='M8 14c26 0 40-8 58-8'/%3E%3Cpath d='M222 14c-26 0-40-8-58-8'/%3E%3C/g%3E%3Cpath d='M115 4l7 7-7 7-7-7z' fill='%23c9a24a'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center}
+.p-blessing{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:42px;color:var(--p-ink);
+  letter-spacing:2px}
+.p-ded{margin-top:10px;font-size:15px;color:var(--p-ink-soft);font-weight:400;line-height:1.6}
+.p-addr{margin-top:8px;font-size:16px;color:var(--p-gold-deep);font-weight:500;letter-spacing:.4px}
 
 /* ============ בורר שעות — גלגלים, כמו בקביעת שעון מעורר ============ */
 .tp-card{max-width:min(360px,94vw)}
@@ -404,15 +443,31 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 
             <!-- ======== POSTER ======== -->
             <div class="poster" id="poster">
+              <div class="p-star"></div>
+              <div class="p-corner tl"></div>
+              <div class="p-corner tr"></div>
+              <div class="p-corner bl"></div>
+              <div class="p-corner br"></div>
+
               <div class="poster-frame">
                 <div class="bsd" x-show="d.showBsd">בס"ד</div>
 
                 <div class="p-head">
+                  <div class="p-crown"></div>
+                  <h1 class="p-title" x-text="d.synagogue"></h1>
+                  <div class="p-sub" x-show="d.subtitle.trim()">
+                    <i></i><span x-text="d.subtitle"></span><i class="flip"></i>
+                  </div>
+
                   <div class="p-head-row">
                     <div class="p-head-side" x-show="d.showPhoto"></div>
                     <div class="p-head-main">
-                      <h1 class="p-title" x-text="d.synagogue"></h1>
-                      <div class="p-sub" x-show="d.subtitle.trim()" x-text="d.subtitle"></div>
+                      <div class="p-meta" x-show="headLine">
+                        <template x-for="(m, i) in headLine" :key="m">
+                          <span><b x-show="i"></b><span x-text="m"></span></span>
+                        </template>
+                      </div>
+                      <div class="p-meta-2" x-show="d.extraMeta.trim()" x-text="d.extraMeta"></div>
                     </div>
                     <div class="p-head-side" x-show="d.showPhoto">
                       <div class="p-portrait-frame">
@@ -421,13 +476,6 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                     </div>
                   </div>
 
-                  <div class="p-meta" x-show="headLine">
-                    <template x-for="(m, i) in headLine" :key="m">
-                      <span><b x-show="i" >&#10022;</b><span x-text="m"></span></span>
-                    </template>
-                  </div>
-                  <div class="p-meta-2" x-show="d.extraMeta.trim()" x-text="d.extraMeta"></div>
-                  <div class="p-rule"></div>
                   <div class="p-banner" x-show="d.banner.trim()" x-text="d.banner"></div>
                 </div>
 
@@ -435,7 +483,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                   <div class="p-sections" :class="d.layout==='grid' ? 'grid-2' : ''">
                     <template x-for="s in visibleSections" :key="s.id">
                       <div class="p-card">
-                        <div class="p-card-head"><i></i><span x-text="s.title"></span><i></i></div>
+                        <div class="p-card-head"><i></i><b></b><span x-text="s.title"></span><b></b><i></i></div>
                         <div class="p-card-body">
                           <template x-for="it in s.items.filter(i=>i.enabled)" :key="it.id">
                             <div class="p-row">
@@ -453,12 +501,13 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                   </div>
 
                   <div class="p-notes" x-show="d.notes.trim()">
-                    <div class="p-notes-head"><i></i><span x-text="d.notesTitle || 'הודעות'"></span><i></i></div>
+                    <div class="p-notes-head"><i></i><b></b><span x-text="d.notesTitle || 'הודעות'"></span><b></b><i></i></div>
                     <div class="p-notes-body" x-text="d.notes"></div>
                   </div>
                 </div>
 
                 <div class="p-foot">
+                  <div class="p-foot-orn"></div>
                   <div class="p-blessing" x-show="d.blessing.trim()" x-text="d.blessing"></div>
                   <div class="p-ded" x-show="d.dedication.trim()" x-text="d.dedication"></div>
                   <div class="p-addr" x-show="d.showAddress && d.address.trim()" x-text="d.address"></div>
@@ -646,7 +695,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
           <div class="theme-dots" style="margin-bottom:16px">
             <template x-for="(t,k) in themes" :key="k">
               <div class="tdot" :class="d.theme===k && 'on'" @click="d.theme=k" :title="t.name"
-                   :style="`background:linear-gradient(145deg,${t.v['--p-bg-1']} 40%,${t.v['--p-gold']} 100%)`"></div>
+                   :style="`background:linear-gradient(145deg,${t.v['--p-edge-1']} 42%,${t.v['--p-gold']} 50%,${t.v['--p-panel-1']} 58%)`"></div>
             </template>
           </div>
 
@@ -955,11 +1004,11 @@ let _uid = 0;
 const uid = () => 'i' + (++_uid) + Math.random().toString(36).slice(2, 6);
 
 const THEMES = {
-  royal:    { name:'ליל פליז',    v:{ '--p-bg-1':'#10203f','--p-bg-2':'#060b1c','--p-glow':'rgba(201,162,74,.14)','--p-gold':'#c9a24a','--p-gold-soft':'#f0dba6','--p-rule':'rgba(201,162,74,.26)','--p-mat':'#0b1730','--p-txt':'#eef1f8','--p-txt-soft':'#9aa8c6','--p-on-gold':'#1b1405','--p-title-shadow':'0 2px 0 rgba(0,0,0,.45)' } },
-  emerald:  { name:'ירוק זית',    v:{ '--p-bg-1':'#0d3428','--p-bg-2':'#03130d','--p-glow':'rgba(201,162,74,.13)','--p-gold':'#c9a24a','--p-gold-soft':'#efdba7','--p-rule':'rgba(201,162,74,.26)','--p-mat':'#07231a','--p-txt':'#ecf6f1','--p-txt-soft':'#9dbcae','--p-on-gold':'#14200d','--p-title-shadow':'0 2px 0 rgba(0,0,0,.45)' } },
-  burgundy: { name:'בורדו מלכותי',v:{ '--p-bg-1':'#41101e','--p-bg-2':'#170409','--p-glow':'rgba(201,162,74,.14)','--p-gold':'#cfa850','--p-gold-soft':'#f3e0af','--p-rule':'rgba(207,168,80,.26)','--p-mat':'#24080f','--p-txt':'#fbeff1','--p-txt-soft':'#cba5ae','--p-on-gold':'#270910','--p-title-shadow':'0 2px 0 rgba(0,0,0,.45)' } },
-  night:    { name:'שחור פליז',   v:{ '--p-bg-1':'#242019','--p-bg-2':'#070605','--p-glow':'rgba(201,162,74,.12)','--p-gold':'#c09a42','--p-gold-soft':'#efdba3','--p-rule':'rgba(192,154,66,.26)','--p-mat':'#14110c','--p-txt':'#f4f0e7','--p-txt-soft':'#aca391','--p-on-gold':'#1a1305','--p-title-shadow':'0 2px 0 rgba(0,0,0,.5)' } },
-  parchment:{ name:'קלף בהיר',    v:{ '--p-bg-1':'#fbf5e6','--p-bg-2':'#ece0c3','--p-glow':'rgba(120,92,20,.07)','--p-gold':'#8d6d18','--p-gold-soft':'#5f4a0c','--p-rule':'rgba(141,109,24,.32)','--p-mat':'#fffbf1','--p-txt':'#2a2214','--p-txt-soft':'#6d5e44','--p-on-gold':'#fdf6e2','--p-title-shadow':'0 1px 0 rgba(255,255,255,.65)' } }
+  royal:    { name:'כחול מלכותי', v:{ '--p-edge-1':'#16305a','--p-edge-2':'#0c1c36','--p-edge-glow':'rgba(216,174,82,.16)','--p-panel-1':'#fdf8ec','--p-panel-2':'#f2e7cd','--p-ink':'#15305a','--p-ink-soft':'#6b6450','--p-time':'#9a6b1f','--p-rule':'rgba(176,138,44,.34)','--p-mat':'#fffdf6','--p-gold':'#c9a24a','--p-gold-soft':'#e8c87e','--p-gold-deep':'#9a7522','--p-on-gold':'#231703' } },
+  emerald:  { name:'ירוק זית',    v:{ '--p-edge-1':'#13402f','--p-edge-2':'#08231a','--p-edge-glow':'rgba(216,174,82,.15)','--p-panel-1':'#fdfaee','--p-panel-2':'#efe8d0','--p-ink':'#123d2d','--p-ink-soft':'#66634c','--p-time':'#8f6418','--p-rule':'rgba(176,138,44,.34)','--p-mat':'#fffdf6','--p-gold':'#c09a42','--p-gold-soft':'#e4c47c','--p-gold-deep':'#8f6c1f','--p-on-gold':'#1d1503' } },
+  burgundy: { name:'בורדו מלכותי',v:{ '--p-edge-1':'#4c1325','--p-edge-2':'#2a0812','--p-edge-glow':'rgba(222,182,96,.16)','--p-panel-1':'#fdf7ec','--p-panel-2':'#f3e6cd','--p-ink':'#4a1526','--p-ink-soft':'#6f6250','--p-time':'#9b6520','--p-rule':'rgba(180,140,46,.34)','--p-mat':'#fffdf6','--p-gold':'#cfa850','--p-gold-soft':'#eccd85','--p-gold-deep':'#9d7826','--p-on-gold':'#2a0f05' } },
+  night:    { name:'שחור פליז',   v:{ '--p-edge-1':'#221e16','--p-edge-2':'#0c0b08','--p-edge-glow':'rgba(216,174,82,.14)','--p-panel-1':'#f9f4e6','--p-panel-2':'#ece2c8','--p-ink':'#2c2417','--p-ink-soft':'#6d6450','--p-time':'#8a6416','--p-rule':'rgba(170,134,42,.34)','--p-mat':'#fffdf6','--p-gold':'#c09a42','--p-gold-soft':'#e6c77e','--p-gold-deep':'#8c6a1e','--p-on-gold':'#1a1305' } },
+  parchment:{ name:'קלף בהיר',    v:{ '--p-edge-1':'#e3d4b0','--p-edge-2':'#cdb98c','--p-edge-glow':'rgba(120,92,20,.10)','--p-panel-1':'#fffdf5','--p-panel-2':'#f6eeda','--p-ink':'#3a2e19','--p-ink-soft':'#736A54','--p-time':'#8a6416','--p-rule':'rgba(150,116,34,.34)','--p-mat':'#fffdf6','--p-gold':'#9d7823','--p-gold-soft':'#d8b866','--p-gold-deep':'#7a5c15','--p-on-gold':'#fdf8ea' } }
 };
 
 function defaults(){
@@ -1327,7 +1376,7 @@ document.addEventListener('alpine:init', () => {
       const node = document.getElementById('poster');
       return await html2canvas(node, {
         scale: 1.5,
-        backgroundColor: (THEMES[this.d.theme]||THEMES.royal).v['--p-bg-2'],
+        backgroundColor: (THEMES[this.d.theme]||THEMES.royal).v['--p-edge-1'],
         useCORS: true,
         logging: false,
         imageTimeout: 6000,
