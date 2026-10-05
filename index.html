@@ -125,16 +125,18 @@ button{font-family:inherit}
     radial-gradient(120% 55% at 50% 0%, var(--p-edge-glow), transparent 60%),
     linear-gradient(170deg, var(--p-edge-1) 0%, var(--p-edge-2) 55%, var(--p-edge-1) 100%);
 }
-/* מגן דוד בראש, מעל הקשת */
-.p-star{position:absolute;top:14px;left:0;right:0;height:68px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='68' height='68' viewBox='0 0 48 48'%3E%3Cpath d='M24 2L4.2 36h39.6ZM24 46L4.2 12h39.6Z' fill='none' stroke='%23d8ae52' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E");
+.poster::before{content:"";position:absolute;inset:13px;border:1px solid var(--p-gold);pointer-events:none}
+/* מגן דוד מוזהב במרכז הקשת */
+.p-star{position:absolute;z-index:2;top:32px;left:0;right:0;height:88px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='88' viewBox='0 0 88 88'%3E%3Ccircle cx='44' cy='44' r='35' fill='%23112640' stroke='%23e4c36f' stroke-width='2'/%3E%3Ccircle cx='44' cy='44' r='30' fill='none' stroke='%23b88d3d' stroke-width='1'/%3E%3Cpath d='M44 17 20 59h48ZM44 71 20 29h48Z' fill='none' stroke='%23f0d58b' stroke-width='3.2' stroke-linejoin='round'/%3E%3Ccircle cx='44' cy='44' r='2' fill='%23f0d58b'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:center}
-/* עיטורי הפינות */
-.p-corner{position:absolute;width:62px;height:62px;background-repeat:no-repeat;background-size:100% 100%}
-.p-corner.tl{top:10px;left:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='30' cy='12' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
-.p-corner.tr{top:10px;right:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8' transform='translate(62 0) scale(-1 1)'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='32' cy='12' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
-.p-corner.bl{bottom:10px;left:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8' transform='translate(0 62) scale(1 -1)'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='30' cy='50' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
-.p-corner.br{bottom:10px;right:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8' transform='translate(62 62) scale(-1 -1)'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='32' cy='50' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
+/* עלי אקנתוס מוזהבים בפינות המסגרת */
+.p-corner{position:absolute;width:76px;height:76px;background-repeat:no-repeat;background-size:100% 100%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cg fill='none' stroke='%23e2c16c' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M5 71V29C5 16 16 5 29 5h42M12 71V31c0-10 9-19 19-19h40'/%3E%3Cpath d='M8 51c13-1 20-8 22-20 8 7 8 17 2 24 10-1 17-8 19-20 8 8 7 18 0 25 10-2 16-8 18-18'/%3E%3Cpath d='M17 39c-6-8-4-16 3-20 7 6 8 12 4 19M31 31c-2-10 3-17 11-18 4 8 2 15-5 20M45 26c2-9 9-13 16-10 1 9-4 15-13 16'/%3E%3C/g%3E%3Ccircle cx='29' cy='5' r='2.5' fill='%23f0d58b'/%3E%3Cpath d='M7 59c6-4 12-4 18 0-6 5-12 5-18 0Zm34-21c4-6 10-8 16-5-4 6-9 8-16 5Z' fill='%23c49a47'/%3E%3C/svg%3E")}
+.p-corner.tl{top:8px;left:8px}
+.p-corner.tr{top:8px;right:8px;transform:scaleX(-1)}
+.p-corner.bl{bottom:8px;left:8px;transform:scaleY(-1)}
+.p-corner.br{bottom:8px;right:8px;transform:scale(-1,-1)}
 
 /* הפאנל הפנימי, שראשו מקושת */
 .poster-frame{
@@ -142,7 +144,7 @@ button{font-family:inherit}
   background:linear-gradient(180deg,var(--p-panel-1),var(--p-panel-2));
   border:2px solid var(--p-gold);
   border-radius:200px 200px 14px 14px;
-  padding:22px 40px 30px;
+  padding:34px 40px 30px;
 }
 .poster-frame::before{content:"";position:absolute;inset:7px;pointer-events:none;
   border:1px solid var(--p-rule);border-radius:194px 194px 9px 9px}
@@ -159,8 +161,8 @@ button{font-family:inherit}
 .p-head-main{flex:1;min-width:0;text-align:center}
 .p-portrait-frame{width:92px;padding:4px;border:1.5px solid var(--p-gold);background:var(--p-mat)}
 .p-portrait{width:81px;height:104px;background-size:cover;background-position:center top;background-color:#d8d0bf}
-.p-title{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:48px;line-height:1.14;
-  color:var(--p-ink);letter-spacing:-.5px;text-align:center;padding:0 26px}
+.p-title{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:52px;line-height:1.14;
+  color:var(--p-ink);text-align:center;padding:0 26px}
 .p-sub{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px}
 .p-sub i{flex:1;max-width:78px;height:12px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='78' height='12' viewBox='0 0 78 12'%3E%3Cpath d='M0 6h58' stroke='%23c9a24a' stroke-width='1.4'/%3E%3Cpath d='M68 1l6 5-6 5-6-5z' fill='%23c9a24a'/%3E%3C/svg%3E");
