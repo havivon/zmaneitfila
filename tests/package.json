@@ -1,0 +1,12 @@
+{
+  "name": "zmanei-tfila-e2e",
+  "private": true,
+  "type": "module",
+  "description": "בדיקות קצה-לקצה ללוח זמני התפילות",
+  "scripts": {
+    "test": "node e2e.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "1.63.0"
+  }
+}
