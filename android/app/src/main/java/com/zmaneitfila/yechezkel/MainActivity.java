@@ -50,7 +50,7 @@ public class MainActivity extends Activity {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
                 fileCallback = cb;
                 try {
-                    startActivityForResult(params.createIntent(), FILE_CHOOSER_REQUEST);
+                    startActivityForResult(chooserIntent(params), FILE_CHOOSER_REQUEST);
                     return true;
                 } catch (Exception e) {
                     fileCallback = null;
@@ -62,6 +62,23 @@ public class MainActivity extends Activity {
         web.addJavascriptInterface(new AppBridge(this), "AndroidBridge");
         web.loadUrl("file:///android_asset/index.html");
         setContentView(web);
+    }
+
+    /** בורר תמונות נשאר לתמונות בלבד. לכל בורר אחר (קובץ הגיבוי) — כל הקבצים:
+     *  createIntent לוקח רק את סוג ה‑accept הראשון, ובורר שמסנן application/json
+     *  מאפיר קובצי .json שהמכשיר מדווח עליהם כ‑application/octet-stream.
+     *  תוכן הקובץ נבדק ממילא בעמוד לפני השחזור. */
+    private static Intent chooserIntent(WebChromeClient.FileChooserParams params) {
+        String[] types = params.getAcceptTypes();
+        boolean imagesOnly = types != null && types.length > 0;
+        if (types != null) for (String t : types) {
+            if (t == null || !t.trim().startsWith("image/")) { imagesOnly = false; break; }
+        }
+        if (imagesOnly) return params.createIntent();
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        return intent;
     }
 
     /** מאפשר לצד האנדרואיד לדווח לעמוד על מצב העדכון. */

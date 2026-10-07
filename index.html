@@ -726,7 +726,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-sm" @click="exportJson()">גיבוי לקובץ</button>
             <button class="btn btn-sm" @click="$refs.json.click()">שחזור מגיבוי</button>
-            <input type="file" accept="application/json" x-ref="json" style="display:none" @change="importJson($event)">
+            <input type="file" accept="application/json,.json" x-ref="json" style="display:none" @change="importJson($event)">
             <button class="btn btn-sm btn-ghost btn-danger" @click="resetAll()">איפוס לברירת מחדל</button>
           </div>
           <div class="hint" style="margin-top:14px">
@@ -875,7 +875,9 @@ function hebrewDate(date){
 }
 function comingShabbat(){
   const d = new Date();
-  d.setDate(d.getDate() + ((6 - d.getDay()) + 7) % 7);   /* השבת הקרובה, וכולל היום אם היום שבת */
+  /* בשבת עצמה הגבאי פותח את האפליקציה רק במוצאי שבת, כדי להכין את הלוח של השבוע הבא —
+     ולכן בשבת מדלגים לשבת הבאה. ביום שישי — מחר; בראשון עד חמישי — השבת הקרובה. */
+  d.setDate(d.getDate() + ((6 - d.getDay()) || 7));
   /* תאריך מקומי: hebrewDate ו‑parashaFor ממירים בעצמם לחצות UTC. המרה כפולה
      הזיזה יום באזורי זמן שמעל UTC+12 (ניו זילנד) */
   d.setHours(12, 0, 0, 0);
