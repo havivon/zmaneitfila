@@ -876,7 +876,10 @@ function hebrewDate(date){
 function comingShabbat(){
   const d = new Date();
   d.setDate(d.getDate() + ((6 - d.getDay()) + 7) % 7);   /* השבת הקרובה, וכולל היום אם היום שבת */
-  return utcNoon(d);
+  /* תאריך מקומי: hebrewDate ו‑parashaFor ממירים בעצמם לחצות UTC. המרה כפולה
+     הזיזה יום באזורי זמן שמעל UTC+12 (ניו זילנד) */
+  d.setHours(12, 0, 0, 0);
+  return d;
 }
 
 /* ====== סדר קריאת הפרשות (מנהג ארץ ישראל) ======
@@ -1069,6 +1072,40 @@ function defaults(){
   };
 }
 
+/* נתונים שמורים או גיבוי משוחזר: משלימים שדות חסרים מברירת המחדל ומתקנים ערכים
+   מסוג שגוי, כדי ששום קובץ לא ישבית את העמוד (העמוד קורא למשל d.banner.trim()).
+   נתונים תקינים עוברים כמות שהם. מחזיר null כשזה אינו לוח שלנו;
+   strict — גיבוי חייב לכלול רשימת קבוצות. */
+function normalize(raw, strict){
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  if (strict && !Array.isArray(raw.sections)) return null;
+  const base = defaults(), d = Object.assign(defaults(), raw);
+  for (const k in base){
+    if (typeof base[k] === 'string' && typeof d[k] !== 'string')
+      d[k] = (d[k] == null || typeof d[k] === 'object') ? base[k] : String(d[k]);
+    else if (typeof base[k] === 'boolean' && typeof d[k] !== 'boolean') d[k] = base[k];
+  }
+  /* תמונה רק כ‑data URI — בלי משאב חיצוני ובלי תווים שישברו את ה‑style */
+  if (typeof d.photo !== 'string' || !/^data:image\/[\w.+-]+;base64,[\w+/=]+$/.test(d.photo)) d.photo = null;
+  if (!THEMES[d.theme]) d.theme = base.theme;
+  if (d.layout !== 'list' && d.layout !== 'grid') d.layout = base.layout;
+  const seen = new Set();
+  const id = (v) => { const s = typeof v === 'string' && v && !seen.has(v) ? v : uid(); seen.add(s); return s; };
+  const str = (v) => typeof v === 'string' ? v : (v == null || typeof v === 'object' ? '' : String(v));
+  const bool = (v, def) => typeof v === 'boolean' ? v : def;
+  d.sections = !Array.isArray(d.sections) ? base.sections
+    : d.sections.filter(s => s && typeof s === 'object' && !Array.isArray(s)).map(s => {
+        s.id = id(s.id); s.title = str(s.title); s.enabled = bool(s.enabled, true);
+        s.items = (Array.isArray(s.items) ? s.items : []).filter(i => i && typeof i === 'object' && !Array.isArray(i)).map(i => {
+          i.id = id(i.id); i.label = str(i.label); i.time = str(i.time); i.note = str(i.note);
+          i.enabled = bool(i.enabled, true); i.freeText = bool(i.freeText, false);
+          return i;
+        });
+        return s;
+      });
+  return d;
+}
+
 document.addEventListener('alpine:init', () => {
   Alpine.data('app', () => ({
     d: defaults(),
@@ -1119,9 +1156,11 @@ document.addEventListener('alpine:init', () => {
         this.upd = { state, version, percent };
       };
       if (NATIVE && NATIVE.checkUpdate){
-        const last = +(localStorage.getItem('upd-check') || 0);
+        /* אחסון חסום לא יעצור את האתחול — בלעדיו מקש החזרה לא היה סוגר חלונות */
+        let last = 0;
+        try { last = +(localStorage.getItem('upd-check') || 0); } catch(e){}
         if (Date.now() - last > 20 * 3600 * 1000){
-          localStorage.setItem('upd-check', String(Date.now()));
+          try { localStorage.setItem('upd-check', String(Date.now())); } catch(e){}
           setTimeout(() => NATIVE.checkUpdate(true), 2500);   /* שקט, אחרי שהעמוד נטען */
         }
       }
@@ -1247,8 +1286,11 @@ document.addEventListener('alpine:init', () => {
       document.addEventListener('selectstart', veto);
       document.addEventListener('contextmenu', veto);
       row.classList.add('pressing');
+      /* טיימר מקומי לכל לחיצה: עם טיימר משותף, לחיצה בשתי אצבעות דרסה את הטיימר
+         של הראשונה, והוא הפעיל גרירה אחרי שהאצבעות כבר הורמו — גרירה תקועה */
+      let timer = 0;
       const stop = () => {
-        clearTimeout(this._pressTimer);
+        clearTimeout(timer);
         row.classList.remove('pressing');
         document.removeEventListener('selectstart', veto);
         document.removeEventListener('contextmenu', veto);
@@ -1262,7 +1304,7 @@ document.addEventListener('alpine:init', () => {
       window.addEventListener('pointermove', watch);
       window.addEventListener('pointerup', stop);
       window.addEventListener('pointercancel', stop);
-      this._pressTimer = setTimeout(() => {
+      timer = setTimeout(() => {
         stop();
         this.beginDrag(row, list, sec, y0);
       }, 300);
@@ -1357,6 +1399,36 @@ document.addEventListener('alpine:init', () => {
     moveSection(i,dir){ const j=i+dir; if(j<0||j>=this.d.sections.length) return;
       const a=this.d.sections; [a[i],a[j]]=[a[j],a[i]]; },
 
+    /* תמונה שהועלתה מוקטנת ונדחסת לפני השמירה: תצלום מלא מהטלפון, כ‑base64,
+       חורג ממכסת האחסון והשמירה כולה נכשלת. בלוח התמונה ברוחב כ‑100 פיקסלים
+       (פי 1.5 בייצוא), ולכן צלע קצרה של 400 פיקסלים מספיקה בשפע. */
+    onPhoto(e){
+      const f = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!f) return;
+      if (f.type && !/^image\//.test(f.type)){ this.toast('יש לבחור קובץ תמונה'); return; }
+      const url = URL.createObjectURL(f);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const w = img.naturalWidth, h = img.naturalHeight;
+        if (!w || !h){ this.toast('לא ניתן לקרוא את התמונה'); return; }
+        const k = Math.min(1, 400 / Math.min(w, h), 1200 / Math.max(w, h));
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(w * k));
+        c.height = Math.max(1, Math.round(h * k));
+        const ctx = c.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        ctx.fillStyle = '#ffffff';                     /* רקע לתמונה שקופה, כי JPEG אינו שקוף */
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        this.d.photo = c.toDataURL('image/jpeg', 0.86);
+        this.toast('התמונה עודכנה');
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); this.toast('לא ניתן לקרוא את התמונה'); };
+      img.src = url;
+    },
+
     /* ---------- עיצוב ושמירה ---------- */
     applyTheme(){
       const t = THEMES[this.d.theme] || THEMES.royal;
@@ -1375,13 +1447,19 @@ document.addEventListener('alpine:init', () => {
     save(){
       clearTimeout(this._t);
       this._t = setTimeout(() => {
-        try { localStorage.setItem(STORE, JSON.stringify(this.d)); } catch(e){}
+        try { localStorage.setItem(STORE, JSON.stringify(this.d)); this._saveFailed = false; }
+        catch(e){
+          /* בלי הודעה המשתמש בטוח שהשינויים נשמרו; מודיעים פעם אחת עד שמירה מוצלחת */
+          if (!this._saveFailed) this.toast('השינויים לא נשמרו במכשיר — ייתכן שהאחסון מלא');
+          this._saveFailed = true;
+        }
       }, 250);
     },
     load(){
       try {
         const raw = localStorage.getItem(STORE);
-        if (raw) this.d = Object.assign(defaults(), JSON.parse(raw));
+        const n = raw ? normalize(JSON.parse(raw)) : null;
+        if (n) this.d = n;
       } catch(e){}
     },
     resetAll(){
@@ -1399,9 +1477,14 @@ document.addEventListener('alpine:init', () => {
       if (!f) return;
       const r = new FileReader();
       r.onload = () => {
-        try { this.d = Object.assign(defaults(), JSON.parse(r.result)); this.toast('הגיבוי שוחזר'); }
-        catch(err){ this.toast('הקובץ אינו תקין'); }
+        /* קובץ שאינו גיבוי של הלוח נדחה, ואינו מחליף את הנתונים הקיימים */
+        let n = null;
+        try { n = normalize(JSON.parse(r.result), true); } catch(err){}
+        if (!n){ this.toast('הקובץ אינו תקין'); return; }
+        this.d = n;
+        this.toast('הגיבוי שוחזר');
       };
+      r.onerror = () => this.toast('לא ניתן לקרוא את הקובץ');
       r.readAsText(f);
       e.target.value = '';
     },
@@ -1424,15 +1507,29 @@ document.addEventListener('alpine:init', () => {
         }
       });
     },
-    async toBlob(){
-      this.busy = true;
-      try {
-        const rev = this._rev;
+    /* הפקה אחת לכל מצב של הנתונים: מי שמבקש את התמונה בזמן שהיא כבר מופקת
+       (הכנה ברקע, או לחיצה כפולה) ממתין לאותה הפקה במקום להתחיל שנייה במקביל */
+    renderBlob(){
+      const rev = this._rev;
+      if (this._job && this._job.rev === rev) return this._job.p;
+      const p = (async () => {
         const canvas = await this.renderCanvas();
         const blob = await new Promise(res => canvas.toBlob(res, 'image/png', 0.97));
         if (blob && rev === this._rev) this._cache = { rev, blob };
         return blob;
-      } finally { this.busy = false; }
+      })();
+      this._job = { rev, p };
+      /* משווים את ה‑Promise עצמו: Alpine עוטף אובייקטים ב‑Proxy, ולכן _job שונה מהאובייקט שהוצב */
+      p.catch(() => {}).then(() => { if (this._job && this._job.p === p) this._job = null; });
+      return p;
+    },
+    async toBlob(){
+      this._busyN = (this._busyN || 0) + 1;
+      this.busy = true;
+      /* כישלון מחזיר null, וכל הקוראים מציגים אז "שגיאה ביצירת התמונה" במקום לשתוק */
+      try { return await this.renderBlob(); }
+      catch(e){ console.error(e); return null; }
+      finally { if (--this._busyN === 0) this.busy = false; }
     },
     fileName(){
       const p = (this.d.parasha||'').trim().replace(/[\\/:*?"<>|]/g,'');
@@ -1447,8 +1544,10 @@ document.addEventListener('alpine:init', () => {
         if (/\.json$/i.test(name)){ NATIVE.shareText(await blob.text(), name); return true; }
         const dataUrl = await this.blobToDataUrl(blob);
         if (NATIVE.saveImage && NATIVE.saveImage(dataUrl, name)) return true;
+        /* השמירה לא הצליחה — פותחים שיתוף, ולא מודיעים שהתמונה נשמרה */
         NATIVE.shareImage(dataUrl, '');
-        return true;
+        this.toast('לא הצלחתי לשמור — אפשר לשמור מתוך רשימת השיתוף');
+        return false;
       }
       try {
         const dl = (window.claude && window.claude.use) ? await window.claude.use('downloads') : null;
@@ -1469,16 +1568,10 @@ document.addEventListener('alpine:init', () => {
       this._prepTimer = setTimeout(() => this.prepareImage(), 1500);
     },
     async prepareImage(){
-      if (this._preparing || this.busy || this.tp.open || this.showPreview) return;
+      if (this._job || this.busy || this.tp.open || this.showPreview) return;
       if (this._cache && this._cache.rev === this._rev) return;
-      this._preparing = true;
-      try {
-        const rev = this._rev;
-        const canvas = await this.renderCanvas();
-        const blob = await new Promise(res => canvas.toBlob(res, 'image/png', 0.97));
-        if (blob && rev === this._rev) this._cache = { rev, blob };
-      } catch(e){ /* הכנה ברקע — כישלון בה אינו מפריע לדבר */ }
-      finally { this._preparing = false; }
+      try { await this.renderBlob(); }
+      catch(e){ /* הכנה ברקע — כישלון בה אינו מפריע לדבר */ }
     },
     async currentBlob(){
       if (this.showPreview && this.previewBlob) return this.previewBlob;
@@ -1521,7 +1614,8 @@ document.addEventListener('alpine:init', () => {
           this.toast('בחרו את קבוצת הוואטסאפ ושלחו');
           return;
         } catch(err){
-          if (err && err.name === 'AbortError') return;
+          /* ביטול, או שיתוף קודם שעדיין פתוח (לחיצה כפולה) — לא עוברים להורדה */
+          if (err && (err.name === 'AbortError' || err.name === 'InvalidStateError')) return;
         }
       }
       await this.saveBlob(blob, this.fileName());
