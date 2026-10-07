@@ -29,7 +29,9 @@ public class MainActivity extends Activity {
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);          /* שמירת ההגדרות במכשיר */
-        s.setAllowFileAccess(true);
+        /* העמוד נטען מ‑file:///android_asset, שאינו תלוי בהגדרה זו. גישה לשאר
+           קבצי המכשיר אינה נחוצה, ולכן חסומה (זו גם ברירת המחדל מאנדרואיד 11). */
+        s.setAllowFileAccess(false);
         s.setLoadWithOverviewMode(false);
         s.setSupportZoom(false);
         s.setBuiltInZoomControls(false);
