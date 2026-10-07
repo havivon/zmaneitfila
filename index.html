@@ -62,6 +62,7 @@ body::before{
 [x-cloak]{display:none!important}
 h1,h2,h3,h4{font-family:'Frank Ruhl Libre','Heebo',serif;margin:0}
 button{font-family:inherit}
+button:focus-visible,.tdot:focus-visible{outline:2px solid var(--gold-soft);outline-offset:2px}
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(232,196,106,.22);border-radius:20px;border:3px solid var(--bg)}
@@ -95,7 +96,7 @@ button{font-family:inherit}
 .btn-wa{background:linear-gradient(145deg,#2ee07a,#128c4a);color:#03230f;border-color:transparent;
   box-shadow:0 12px 26px -14px rgba(37,211,102,.9);font-weight:800}
 .btn-wa:hover{background:linear-gradient(145deg,#48ea8c,#149a51)}
-.btn-sm{padding:7px 11px;font-size:12.5px;border-radius:10px}
+.btn-sm{padding:9px 12px;font-size:12.5px;border-radius:10px;min-height:40px}
 .btn-ghost{background:transparent}
 .btn-danger:hover{background:rgba(255,86,86,.16);border-color:rgba(255,86,86,.4);color:#ffb3b3}
 .btn-del{background:linear-gradient(145deg,#e05555,#a32626);color:#fff;border-color:transparent;font-weight:800}
@@ -344,11 +345,11 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
 .group{border:1px solid var(--line-soft);border-radius:15px;margin-bottom:14px;overflow:hidden;background:rgba(0,0,0,.28)}
-.group-head{display:flex;align-items:center;gap:9px;padding:12px;
+.group-head{display:flex;align-items:center;gap:9px;padding:8px 12px;
   background:linear-gradient(180deg,rgba(232,196,106,.17),rgba(232,196,106,.06));
   border-bottom:1px solid rgba(232,196,106,.3)}
 .group-head input.title-inp{flex:1;min-width:0;background:transparent;border:0;color:var(--gold-soft);
-  font-size:15.5px;font-weight:800;font-family:'Frank Ruhl Libre',serif;padding:3px 4px;border-radius:7px}
+  font-size:15.5px;font-weight:800;font-family:'Frank Ruhl Libre',serif;padding:7px 6px;border-radius:7px;min-height:38px}
 .group-head input.title-inp:focus{outline:0;background:rgba(0,0,0,.35)}
 .group-fold{transition:height .28s cubic-bezier(.3,.8,.35,1)}
 .group-body{padding:8px 10px 12px}
@@ -368,13 +369,15 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .inp-time{width:84px;flex:0 0 auto;text-align:center;font-weight:700;color:var(--gold-soft);letter-spacing:.5px}
 .inp-time.txt{font-size:11.5px;letter-spacing:0;line-height:1.2}
 .note-inp{margin-top:6px;font-size:12.5px!important;padding:6px 9px!important}
-.item-tools{display:flex;gap:3px;flex:0 0 auto}
+.item-tools{display:flex;gap:6px;flex:0 0 auto}
 
-.icon-btn{width:28px;height:28px;border-radius:9px;border:1px solid transparent;background:rgba(255,255,255,.05);
-  color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:.16s;padding:0}
+.icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid transparent;background:rgba(255,255,255,.05);
+  color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:.16s;padding:0;position:relative}
+/* אזור לחיצה של 40px לפחות, בלי להגדיל את הכפתור לעין */
+.icon-btn::after{content:"";position:absolute;inset:-3px}
 .icon-btn:hover{background:rgba(255,255,255,.13);color:var(--txt)}
 .icon-btn.del:hover{background:rgba(255,86,86,.18);color:#ffb0b0}
-.icon-btn svg{width:14px;height:14px}
+.icon-btn svg{width:15px;height:15px}
 .item.dragging{background:rgba(232,196,106,.15);border-color:rgba(232,196,106,.5);
   position:relative;z-index:5}
 .group-body.dragging-list .item{transition:transform .18s cubic-bezier(.2,.8,.3,1)}
@@ -390,6 +393,8 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 /* מתג */
 .sw{position:relative;width:42px;height:24px;flex:0 0 auto;cursor:pointer}
 .sw input{opacity:0;width:0;height:0;position:absolute}
+.sw::after{content:"";position:absolute;inset:-8px -3px}   /* אזור לחיצה 48×40 */
+.sw input:focus-visible + i{outline:2px solid var(--gold-soft);outline-offset:2px}
 .sw i{position:absolute;inset:0;background:rgba(255,255,255,.12);border-radius:999px;transition:.2s;display:block}
 .sw i::after{content:"";position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;
   background:#8e9ab8;transition:.2s}
@@ -408,12 +413,12 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .tdot:hover{transform:translateY(-2px)}
 .tdot.on{border-color:var(--gold-soft);box-shadow:0 0 0 3px rgba(232,196,106,.18)}
 .seg{display:flex;gap:6px;background:rgba(0,0,0,.3);padding:5px;border-radius:12px}
-.seg button{flex:1;border:0;background:transparent;color:var(--muted);padding:8px;border-radius:9px;
+.seg button{flex:1;border:0;background:transparent;color:var(--muted);padding:8px;min-height:40px;border-radius:9px;
   font-size:13px;font-weight:700;cursor:pointer;transition:.16s}
 .seg button.on{background:rgba(232,196,106,.18);color:var(--gold-soft)}
 
 .photo-box{display:flex;gap:12px;align-items:center}
-.photo-prev{width:72px;height:92px;border-radius:5px;background-size:cover;background-position:center top;
+.photo-prev{width:72px;height:92px;border-radius:36px 36px 5px 5px;background-size:cover;background-position:center top;
   border:2px solid rgba(232,196,106,.5);flex:0 0 auto;background-color:#1a1409}
 
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);z-index:99;
@@ -509,7 +514,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
                         <i></i><span x-text="d.subtitle"></span><i class="flip"></i>
                       </div>
                       <div class="p-meta" x-show="headLine">
-                        <template x-for="(m, i) in headLine" :key="m">
+                        <template x-for="(m, i) in headLine" :key="i">
                           <span><b x-show="i"></b><span x-text="m"></span></span>
                         </template>
                       </div>
