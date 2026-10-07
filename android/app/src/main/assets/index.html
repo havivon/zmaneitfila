@@ -158,11 +158,12 @@ button{font-family:inherit}
 .p-corner.bl{bottom:0;left:0;transform:scaleY(-1)}
 .p-corner.br{bottom:0;right:0;transform:scale(-1,-1)}
 
-/* הפאנל הפנימי, שראשו מקושת. מעליו מרקם קלף עדין (רעש SVG) */
+/* הפאנל הפנימי, שראשו מקושת. מעליו כתמיות קלף רכה (רעש SVG בתדר נמוך —
+   רעש גרגירי עדין מכפיל את משקל התמונה פי 3.5, ולכן לא נוסף) */
 .poster-frame{
   flex:1;display:flex;flex-direction:column;position:relative;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='m' x='0' y='0' width='1' height='1'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.014' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .40 0 0 0 0 .14 0 0 0 .55 -.22'/%3E%3C/filter%3E%3Cfilter id='f' x='0' y='0' width='1' height='1'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .33 0 0 0 0 .12 0 0 0 .7 -.33'/%3E%3C/filter%3E%3Crect width='360' height='360' filter='url(%23m)' opacity='.55'/%3E%3Crect width='360' height='360' filter='url(%23f)' opacity='.6'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='m' x='0' y='0' width='1' height='1'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.014' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .40 0 0 0 0 .14 0 0 0 .55 -.22'/%3E%3C/filter%3E%3Crect width='360' height='360' filter='url(%23m)' opacity='.4'/%3E%3C/svg%3E"),
     linear-gradient(180deg,var(--p-panel-1),var(--p-panel-2));
   border:2px solid var(--p-gold);
   border-radius:50% 50% 12px 12px / 190px 190px 12px 12px;
@@ -171,18 +172,20 @@ button{font-family:inherit}
 .poster-frame::before{content:"";position:absolute;inset:7px;pointer-events:none;
   border:1px solid var(--p-rule);border-radius:50% 50% 8px 8px / 184px 184px 8px 8px}
 /* בס"ד — בתוך עיטור הפינה הימנית העליונה */
-.bsd{position:absolute;top:-40px;right:18px;white-space:nowrap;font-size:15px;color:var(--p-fr);
+.bsd{position:absolute;top:-16px;right:48px;white-space:nowrap;font-size:15px;color:var(--p-fr);
   font-family:'Frank Ruhl Libre',serif;font-weight:500;letter-spacing:.6px}
 
 /* ---- ראש הלוח ---- */
 .p-head{position:relative;padding-top:4px}
 .p-crown{width:300px;height:40px;margin:0 auto 14px}
-.p-head-row{display:flex;align-items:flex-end;gap:16px;margin-top:0}
-.p-head-side{flex:0 0 108px;width:108px}
+.p-head-row{display:flex;align-items:flex-start;gap:16px;margin-top:0}
+/* עמודת התמונה מונמכת, כדי שראש המסגרת יישאר רחוק מקו הקשת */
+.p-head-side{flex:0 0 108px;width:108px;padding-top:30px}
 .p-head-main{flex:1;min-width:0;text-align:center}
-/* התמונה יושבת בתחתית שורת הכותרת, הרחק מקו הקשת */
-.p-portrait-frame{width:108px;padding:4px;border:2px solid var(--p-gold);background:var(--p-mat);margin-bottom:2px}
-.p-portrait{width:96px;height:124px;background-size:cover;background-position:center top;background-color:#d8d0bf}
+.p-portrait-frame{width:108px;padding:4px;border:2px solid var(--p-gold);background:var(--p-mat);margin-bottom:2px;
+  border-radius:54px 54px 4px 4px}   /* ראש מקושת, כקשת הפאנל */
+.p-portrait{width:96px;height:128px;background-size:cover;background-position:center top;background-color:#d8d0bf;
+  border-radius:48px 48px 2px 2px}
 .p-head-main .p-title{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:52px;line-height:1.12;
   color:var(--p-ink);text-align:center;padding:0 4px;text-wrap:balance}
 /* שם ארוך לצד התמונה — מוקטן מעט, כדי שיישאר בשתי שורות ובתוך הקשת */
@@ -204,9 +207,11 @@ button{font-family:inherit}
   border:2px solid var(--p-gold-deep);border-radius:11px;padding:11px 16px}
 
 /* ---- גוף הלוח ---- */
-.p-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px;padding:16px 0}
+/* חותם עמום במרכז אזור הזמנים: כשיש מעט זמנים הלוח נראה מכוון ולא ריק */
+.p-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px;padding:16px 0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' viewBox='0 0 420 420'%3E%3Cg fill='none' stroke='%23a8822e' stroke-opacity='.09'%3E%3Ccircle cx='210' cy='210' r='204' stroke-width='2.5'/%3E%3Ccircle cx='210' cy='210' r='194' stroke-width='1'/%3E%3Cpath d='M210 60 80.1 285.0h259.8ZM210 360 80.1 135.0h259.8Z' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M210 60 80.1 285.0h259.8ZM210 360 80.1 135.0h259.8Z' stroke-width='1' stroke-opacity='.08' transform='translate%28210 210%29 scale%28.86%29 translate%28-210 -210%29'/%3E%3C/g%3E%3C/svg%3E") no-repeat center/420px 420px}
 .p-sections{display:grid;gap:26px}
-.p-sections.grid-2{grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.p-sections.grid-2{grid-template-columns:1fr 1fr;gap:22px 18px;align-items:start}
 /* מפריד כותרת: קו מוזהב שדוהה החוצה, מעוין, כותרת, מעוין, קו */
 .p-card-head,.p-notes-head{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px}
 .p-card-head i,.p-notes-head i{flex:1;height:1.5px;background:linear-gradient(to right,var(--p-gold),var(--p-gold-0))}
@@ -231,12 +236,12 @@ button{font-family:inherit}
 /* בפריסת שתי עמודות יש פחות רוחב — הטיפוגרפיה מוקטנת בהתאם */
 .p-sections.grid-2 .p-card-head{gap:9px;margin-bottom:4px}
 .p-sections.grid-2 .p-card-head span{font-size:21px}
-.p-sections.grid-2 .p-row{padding:10px 2px;gap:8px}
-.p-sections.grid-2 .p-label{font-size:21px;max-width:72%}
+.p-sections.grid-2 .p-row{padding:10px 2px;gap:6px}
+.p-sections.grid-2 .p-label{font-size:20px;max-width:74%}
 .p-sections.grid-2 .p-note{font-size:12px;margin-top:2px}
 .p-sections.grid-2 .p-time{font-size:27px}
 .p-sections.grid-2 .p-time.txt{font-size:16px}
-.p-sections.grid-2 .p-dots{min-width:10px}
+.p-sections.grid-2 .p-dots{min-width:8px}
 /* מעט זמנים (עד שלושה בקבוצה אחת, או עד שניים בכל אחת משתי קבוצות) —
    שורות מרווחות וגדולות יותר, כדי שהלוח לא ייראה ריק */
 .p-sections:not(.grid-2):not(:has(> .p-card ~ .p-card)):not(:has(.p-row:nth-of-type(4))) .p-row,
@@ -484,8 +489,8 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
               <!-- העיטורים הם SVG מוטמע ולא תמונת רקע: html2canvas מצייר תמונות רקע
                    ברזולוציה 1:1 ומגדיל אותן (מטושטש), ואילו SVG מוטמע מצויר חד. -->
               <div class="p-star"><svg width="90" height="90" viewBox="0 0 90 90" aria-hidden="true"><defs><linearGradient id="pg-star" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="90" y2="90"><stop class="h" offset="0"/><stop class="m" offset=".32"/><stop class="l" offset=".55"/><stop class="m" offset=".78"/><stop class="h" offset="1"/></linearGradient></defs><path class="fill" d="M45 5 10.36 65h69.28ZM45 85 10.36 25h69.28Z"/><path d="M45 5 10.36 65h69.28ZM45 85 10.36 25h69.28Z" fill="none" stroke="url(#pg-star)" stroke-width="3.6" stroke-linejoin="round"/><path class="shine" d="M45 5 10.36 65h69.28ZM45 85 10.36 25h69.28Z" fill="none" stroke-width=".9" stroke-linejoin="round"/></svg></div>
-              <div class="p-corner tl"><svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true"><defs><linearGradient id="pg-tl" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="150" y2="150"><stop class="h" offset="0"/><stop class="m" offset=".32"/><stop class="l" offset=".55"/><stop class="m" offset=".78"/><stop class="h" offset="1"/></linearGradient></defs><g id="pa-tl"><path d="M30 26C48 21.5 65 22 76 30C85 37 85 49 76 51C69 52.5 65 46 69 42C71.5 39.5 75.5 41 75 44" fill="none" stroke="url(#pg-tl)" stroke-width="2" stroke-linecap="round"/><path d="M61 24.6C88 20 112 22 138 26.5" fill="none" stroke="url(#pg-tl)" stroke-width="1.3" stroke-linecap="round"/><path d="M96 22.6C104 17 112 16.6 118 18" fill="none" stroke="url(#pg-tl)" stroke-width="1.1" stroke-linecap="round"/><path transform="translate(44 23) rotate(-32) scale(1)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"/><path transform="translate(56 25.6) rotate(30) scale(0.9)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"/><path transform="translate(86 22) rotate(-26) scale(0.85)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"/><path transform="translate(108 23.4) rotate(18) scale(0.75)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"/><circle cx="142" cy="27" r="1.7" fill="url(#pg-tl)"/></g><use href="#pa-tl" transform="matrix(0 1 1 0 0 0)"/><path d="M14 3 25 14 14 25 3 14Z" fill="url(#pg-tl)"/><path class="cut" d="M14 8.6 19.4 14 14 19.4 8.6 14Z"/><circle cx="14" cy="14" r="1.7" fill="url(#pg-tl)"/><path transform="translate(27 27) rotate(45) scale(1.1)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"/><circle cx="47" cy="47" r="1.8" fill="url(#pg-tl)"/></svg></div>
-              <div class="p-corner tr"><svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true"><defs><linearGradient id="pg-tr" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="150" y2="150"><stop class="h" offset="0"/><stop class="m" offset=".32"/><stop class="l" offset=".55"/><stop class="m" offset=".78"/><stop class="h" offset="1"/></linearGradient></defs><g id="pa-tr"><path d="M30 26C48 21.5 65 22 76 30C85 37 85 49 76 51C69 52.5 65 46 69 42C71.5 39.5 75.5 41 75 44" fill="none" stroke="url(#pg-tr)" stroke-width="2" stroke-linecap="round"/><path d="M61 24.6C88 20 112 22 138 26.5" fill="none" stroke="url(#pg-tr)" stroke-width="1.3" stroke-linecap="round"/><path d="M96 22.6C104 17 112 16.6 118 18" fill="none" stroke="url(#pg-tr)" stroke-width="1.1" stroke-linecap="round"/><path transform="translate(44 23) rotate(-32) scale(1)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"/><path transform="translate(56 25.6) rotate(30) scale(0.9)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"/><path transform="translate(86 22) rotate(-26) scale(0.85)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"/><path transform="translate(108 23.4) rotate(18) scale(0.75)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"/><circle cx="142" cy="27" r="1.7" fill="url(#pg-tr)"/></g><use href="#pa-tr" transform="matrix(0 1 1 0 0 0)"/><path d="M14 3 25 14 14 25 3 14Z" fill="url(#pg-tr)"/><path class="cut" d="M14 8.6 19.4 14 14 19.4 8.6 14Z"/><circle cx="14" cy="14" r="1.7" fill="url(#pg-tr)"/><path transform="translate(27 27) rotate(45) scale(1.1)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"/><circle cx="47" cy="47" r="1.8" fill="url(#pg-tr)"/></svg></div>
+              <div class="p-corner tl"><svg width="180" height="180" viewBox="0 0 180 180" aria-hidden="true"><defs><linearGradient id="pg-tl" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="180" y2="180"><stop class="h" offset="0"/><stop class="m" offset=".32"/><stop class="l" offset=".55"/><stop class="m" offset=".78"/><stop class="h" offset="1"/></linearGradient></defs><g id="pa-tl" transform="translate(-3 -3) scale(1.22)"><path d="M30 26C48 21.5 65 22 76 30C85 37 85 49 76 51C69 52.5 65 46 69 42C71.5 39.5 75.5 41 75 44" fill="none" stroke="url(#pg-tl)" stroke-width="2" stroke-linecap="round"/><path d="M61 24.6C88 20 112 22 138 26.5" fill="none" stroke="url(#pg-tl)" stroke-width="1.3" stroke-linecap="round"/><path d="M96 22.6C104 17 112 16.6 118 18" fill="none" stroke="url(#pg-tl)" stroke-width="1.1" stroke-linecap="round"/><path transform="translate(44 23) rotate(-32) scale(1)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"/><path transform="translate(56 25.6) rotate(30) scale(0.9)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"/><path transform="translate(86 22) rotate(-26) scale(0.85)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"/><path transform="translate(108 23.4) rotate(18) scale(0.75)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"/><circle cx="142" cy="27" r="1.7" fill="url(#pg-tl)"/></g><use href="#pa-tl" transform="matrix(0 1 1 0 0 0)"/><path d="M14 3 25 14 14 25 3 14Z" fill="url(#pg-tl)"/><path class="cut" d="M14 8.6 19.4 14 14 19.4 8.6 14Z"/><circle cx="14" cy="14" r="1.7" fill="url(#pg-tl)"/><path transform="translate(28 28) rotate(45) scale(1.35)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"/><circle cx="53" cy="53" r="2" fill="url(#pg-tl)"/></svg></div>
+              <div class="p-corner tr"><svg width="180" height="180" viewBox="0 0 180 180" aria-hidden="true"><defs><linearGradient id="pg-tr" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="180" y2="180"><stop class="h" offset="0"/><stop class="m" offset=".32"/><stop class="l" offset=".55"/><stop class="m" offset=".78"/><stop class="h" offset="1"/></linearGradient></defs><g id="pa-tr" transform="translate(-3 -3) scale(1.22)"><path d="M30 26C48 21.5 65 22 76 30C85 37 85 49 76 51C69 52.5 65 46 69 42C71.5 39.5 75.5 41 75 44" fill="none" stroke="url(#pg-tr)" stroke-width="2" stroke-linecap="round"/><path d="M61 24.6C88 20 112 22 138 26.5" fill="none" stroke="url(#pg-tr)" stroke-width="1.3" stroke-linecap="round"/><path d="M96 22.6C104 17 112 16.6 118 18" fill="none" stroke="url(#pg-tr)" stroke-width="1.1" stroke-linecap="round"/><path transform="translate(44 23) rotate(-32) scale(1)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"/><path transform="translate(56 25.6) rotate(30) scale(0.9)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"/><path transform="translate(86 22) rotate(-26) scale(0.85)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"/><path transform="translate(108 23.4) rotate(18) scale(0.75)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"/><circle cx="142" cy="27" r="1.7" fill="url(#pg-tr)"/></g><use href="#pa-tr" transform="matrix(0 1 1 0 0 0)"/><path d="M14 3 25 14 14 25 3 14Z" fill="url(#pg-tr)"/><path class="cut" d="M14 8.6 19.4 14 14 19.4 8.6 14Z"/><circle cx="14" cy="14" r="1.7" fill="url(#pg-tr)"/><path transform="translate(28 28) rotate(45) scale(1.35)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"/><circle cx="53" cy="53" r="2" fill="url(#pg-tr)"/></svg></div>
               <div class="p-corner bl"><svg width="60" height="60" viewBox="0 0 60 60" aria-hidden="true"><defs><linearGradient id="pg-bl" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="60" y2="60"><stop class="h" offset="0"/><stop class="m" offset=".32"/><stop class="l" offset=".55"/><stop class="m" offset=".78"/><stop class="h" offset="1"/></linearGradient></defs><g id="ps-bl"><path transform="translate(27 14) rotate(-16) scale(0.8)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-bl)"/><path transform="translate(27 14) rotate(16) scale(0.8)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-bl)"/><circle cx="44" cy="14" r="1.5" fill="url(#pg-bl)"/></g><use href="#ps-bl" transform="matrix(0 1 1 0 0 0)"/><path d="M14 3 25 14 14 25 3 14Z" fill="url(#pg-bl)"/><path class="cut" d="M14 8.6 19.4 14 14 19.4 8.6 14Z"/><circle cx="14" cy="14" r="1.7" fill="url(#pg-bl)"/></svg></div>
               <div class="p-corner br"><svg width="60" height="60" viewBox="0 0 60 60" aria-hidden="true"><defs><linearGradient id="pg-br" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="60" y2="60"><stop class="h" offset="0"/><stop class="m" offset=".32"/><stop class="l" offset=".55"/><stop class="m" offset=".78"/><stop class="h" offset="1"/></linearGradient></defs><g id="ps-br"><path transform="translate(27 14) rotate(-16) scale(0.8)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-br)"/><path transform="translate(27 14) rotate(16) scale(0.8)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-br)"/><circle cx="44" cy="14" r="1.5" fill="url(#pg-br)"/></g><use href="#ps-br" transform="matrix(0 1 1 0 0 0)"/><path d="M14 3 25 14 14 25 3 14Z" fill="url(#pg-br)"/><path class="cut" d="M14 8.6 19.4 14 14 19.4 8.6 14Z"/><circle cx="14" cy="14" r="1.7" fill="url(#pg-br)"/></svg></div>
 
