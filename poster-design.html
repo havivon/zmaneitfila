@@ -35,20 +35,25 @@
 <style>
 :root{
 /* ערכת הלוח — נשלטת ע"י המנהל */
-  --p-edge-1:#16305a;
-  --p-edge-2:#0c1c36;
+  --p-edge-1:#0b2344;
+  --p-edge-2:#071a33;
   --p-edge-glow:rgba(216,174,82,.16);
-  --p-panel-1:#fdf8ec;
-  --p-panel-2:#f2e7cd;
-  --p-ink:#15305a;
-  --p-ink-soft:#6b6450;
-  --p-time:#9a6b1f;
-  --p-rule:rgba(176,138,44,.34);
+  --p-panel-1:#fffdf6;
+  --p-panel-2:#f3ecd9;
+  --p-ink:#0b2344;
+  --p-ink-soft:#685638;
+  --p-time:#916313;
+  --p-rule:rgba(169,131,43,.38);
   --p-mat:#fffdf6;
-  --p-gold:#c9a24a;
-  --p-gold-soft:#e8c87e;
-  --p-gold-deep:#9a7522;
+  --p-gold:#d5b25e;
+  --p-gold-soft:#f0d58b;
+  --p-gold-deep:#916b20;
   --p-on-gold:#231703;
+  --p-fr-hi:#fbe7a6;
+  --p-fr:#d8b25c;
+  --p-fr-lo:#9c7427;
+  --p-fr-rule:rgba(226,193,108,.62);
+  --p-gold-0:rgba(213,178,94,0);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:#20242c}
@@ -56,123 +61,156 @@ body{display:flex;justify-content:center;padding:24px 0}
 
 /* ============ הלוח ============
    מסגרת כחולה עם עיטורי פינה מוזהבים, ובתוכה פאנל קלף שראשו מקושת
-   כפתח ארון קודש. הכיתוב כחול, השעות בברונזה, והמפרידים מוזהבים.   */
+   כפתח ארון קודש. הכיתוב כחול, השעות בברונזה, והמפרידים מוזהבים.
+   התמונה המשותפת מופקת ב-html2canvas, ולכן:
+   · עיטורים מפורטים הם SVG מוטמע (תמונת רקע מצוירת ב-1:1 ומיטשטשת בהגדלה);
+   · צבעי ה-SVG נקבעים כאן דרך משתני הערכה — html2canvas מעתיק אותם פנימה;
+   · קווים דקים הם גרדיאנט CSS ולא SVG נמתח (שמותיר נקודות תועות בקצוות). */
 .poster{
-  width:720px;min-height:1280px;position:relative;overflow:hidden;
+  width:720px;min-height:1480px;position:relative;overflow:hidden;
   display:flex;flex-direction:column;
-  padding:92px 30px 34px;
+  padding:118px 26px 30px;
   font-family:'Heebo',Arial,sans-serif;color:var(--p-ink);
   background:
     radial-gradient(120% 55% at 50% 0%, var(--p-edge-glow), transparent 60%),
     linear-gradient(170deg, var(--p-edge-1) 0%, var(--p-edge-2) 55%, var(--p-edge-1) 100%);
 }
-/* מגן דוד בראש, מעל הקשת */
-.p-star{position:absolute;top:14px;left:0;right:0;height:68px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='68' height='68' viewBox='0 0 48 48'%3E%3Cpath d='M24 2L4.2 36h39.6ZM24 46L4.2 12h39.6Z' fill='none' stroke='%23d8ae52' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:center}
-/* עיטורי הפינות */
-.p-corner{position:absolute;width:62px;height:62px;background-repeat:no-repeat;background-size:100% 100%}
-.p-corner.tl{top:10px;left:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='30' cy='12' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
-.p-corner.tr{top:10px;right:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8' transform='translate(62 0) scale(-1 1)'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='32' cy='12' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
-.p-corner.bl{bottom:10px;left:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8' transform='translate(0 62) scale(1 -1)'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='30' cy='50' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
-.p-corner.br{bottom:10px;right:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='62' viewBox='0 0 62 62'%3E%3Cg fill='none' stroke='%23d8ae52' stroke-width='1.8' transform='translate(62 62) scale(-1 -1)'%3E%3Cpath d='M4 60V22C4 12 12 4 22 4h38'/%3E%3Cpath d='M12 60V26c0-8 6-14 14-14h34'/%3E%3Cpath d='M12 36c13 0 24-11 24-24'/%3E%3Cpath d='M21 21c5 0 9-4 9-9'/%3E%3C/g%3E%3Ccircle cx='32' cy='50' r='2.4' fill='%23d8ae52'/%3E%3C/svg%3E")}
+.poster::before{content:"";position:absolute;inset:10px;border:1px solid var(--p-fr);pointer-events:none}
+.poster::after{content:"";position:absolute;inset:17px;border:1px solid var(--p-fr-rule);pointer-events:none}
 
-/* הפאנל הפנימי, שראשו מקושת */
+/* צבעי העיטורים המוזהבים: על המסגרת (p-fr) ועל הקלף (p-gold) */
+.p-star stop.h,.p-corner stop.h{stop-color:var(--p-fr-hi)}
+.p-star stop.m,.p-corner stop.m{stop-color:var(--p-fr)}
+.p-star stop.l,.p-corner stop.l{stop-color:var(--p-fr-lo)}
+.p-star .fill,.p-corner .cut{fill:var(--p-edge-1)}
+.p-star .shine{stroke:var(--p-fr-hi);opacity:.55}
+.p-crown stop.h,.p-foot-orn stop.h{stop-color:var(--p-gold-soft)}
+.p-crown stop.m,.p-foot-orn stop.m{stop-color:var(--p-gold)}
+.p-crown stop.l,.p-foot-orn stop.l{stop-color:var(--p-gold-deep)}
+.p-crown .cut,.p-foot-orn .cut{fill:var(--p-panel-1)}
+
+/* מגן דוד מעל הקשת — קודקודו התחתון נח על קו הקשת */
+.p-star{position:absolute;z-index:3;top:33px;left:50%;margin-left:-45px;width:90px;height:90px}
+/* ה-svg עצמו בלי מיקום או טרנספורמציה: html2canvas מעתיק את סגנונו לתוך התמונה */
+.p-star svg,.p-corner svg,.p-crown svg,.p-foot-orn svg{display:block}
+/* עיטורי פינות: בפינות העליונות ענף פיליגרן מלא; בתחתונות — מעוין וזלזל קטן,
+   כדי שלא ייגעו בפאנל */
+.p-corner{position:absolute;z-index:2}
+.p-corner.tl{top:0;left:0}
+.p-corner.tr{top:0;right:0;transform:scaleX(-1)}
+.p-corner.bl{bottom:0;left:0;transform:scaleY(-1)}
+.p-corner.br{bottom:0;right:0;transform:scale(-1,-1)}
+
+/* הפאנל הפנימי, שראשו מקושת. מעליו כתמיות קלף רכה (רעש SVG בתדר נמוך —
+   רעש גרגירי עדין מכפיל את משקל התמונה פי 3.5, ולכן לא נוסף) */
 .poster-frame{
   flex:1;display:flex;flex-direction:column;position:relative;
-  background:linear-gradient(180deg,var(--p-panel-1),var(--p-panel-2));
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='m' x='0' y='0' width='1' height='1'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.014' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .40 0 0 0 0 .14 0 0 0 .55 -.22'/%3E%3C/filter%3E%3Crect width='360' height='360' filter='url(%23m)' opacity='.4'/%3E%3C/svg%3E"),
+    linear-gradient(180deg,var(--p-panel-1),var(--p-panel-2));
   border:2px solid var(--p-gold);
-  border-radius:200px 200px 14px 14px;
-  padding:22px 40px 30px;
+  border-radius:50% 50% 12px 12px / 190px 190px 12px 12px;
+  padding:34px 28px 28px;
 }
 .poster-frame::before{content:"";position:absolute;inset:7px;pointer-events:none;
-  border:1px solid var(--p-rule);border-radius:194px 194px 9px 9px}
-.bsd{position:absolute;top:-58px;right:74px;white-space:nowrap;font-size:15px;color:var(--p-gold);
-  font-family:'Frank Ruhl Libre',serif;letter-spacing:.6px}
+  border:1px solid var(--p-rule);border-radius:50% 50% 8px 8px / 184px 184px 8px 8px}
+/* בס"ד — בתוך עיטור הפינה הימנית העליונה */
+.bsd{position:absolute;top:-16px;right:48px;white-space:nowrap;font-size:15px;color:var(--p-fr);
+  font-family:'Frank Ruhl Libre',serif;font-weight:500;letter-spacing:.6px}
 
 /* ---- ראש הלוח ---- */
-.p-head{position:relative;padding-top:8px}
-.p-crown{height:30px;margin:0 auto 14px;max-width:280px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='30' viewBox='0 0 280 30'%3E%3Cg fill='none' stroke='%23c9a24a' stroke-width='1.7'%3E%3Cpath d='M12 24c26 0 40-16 66-16 12 0 20 5 24 11'/%3E%3Cpath d='M268 24c-26 0-40-16-66-16-12 0-20 5-24 11'/%3E%3Cpath d='M112 20c7 0 12-4 12-10'/%3E%3Cpath d='M168 20c-7 0-12-4-12-10'/%3E%3C/g%3E%3Cpath d='M140 13l6 7-6 7-6-7z' fill='%23c9a24a'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:center}
-.p-head-row{display:flex;align-items:center;gap:18px;margin-top:18px}
-.p-head-side{flex:0 0 92px;width:92px}
+.p-head{position:relative;padding-top:4px}
+.p-crown{width:300px;height:40px;margin:0 auto 14px}
+.p-head-row{display:flex;align-items:flex-start;gap:16px;margin-top:0}
+/* עמודת התמונה מונמכת, כדי שראש המסגרת יישאר רחוק מקו הקשת */
+.p-head-side{flex:0 0 108px;width:108px;padding-top:30px}
 .p-head-main{flex:1;min-width:0;text-align:center}
-.p-portrait-frame{width:92px;padding:4px;border:1.5px solid var(--p-gold);background:var(--p-mat)}
-.p-portrait{width:81px;height:104px;background-size:cover;background-position:center top;background-color:#d8d0bf}
-.p-title{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:48px;line-height:1.14;
-  color:var(--p-ink);letter-spacing:-.5px;text-align:center;padding:0 26px}
+.p-portrait-frame{width:108px;padding:4px;border:2px solid var(--p-gold);background:var(--p-mat);margin-bottom:2px;
+  border-radius:54px 54px 4px 4px}   /* ראש מקושת, כקשת הפאנל */
+.p-portrait{width:96px;height:128px;background-size:cover;background-position:center top;background-color:#d8d0bf;
+  border-radius:48px 48px 2px 2px}
+.p-head-main .p-title{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:52px;line-height:1.12;
+  color:var(--p-ink);text-align:center;padding:0 4px;text-wrap:balance}
+/* שם ארוך לצד התמונה — מוקטן מעט, כדי שיישאר בשתי שורות ובתוך הקשת */
+.p-head-main .p-title.long{font-size:44px;line-height:1.14}
 .p-sub{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px}
-.p-sub i{flex:1;max-width:78px;height:12px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='78' height='12' viewBox='0 0 78 12'%3E%3Cpath d='M0 6h58' stroke='%23c9a24a' stroke-width='1.4'/%3E%3Cpath d='M68 1l6 5-6 5-6-5z' fill='%23c9a24a'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:center}
-.p-sub i.flip{transform:scaleX(-1)}
+.p-sub i{flex:1;max-width:64px;height:1.5px;background:linear-gradient(to right,var(--p-gold),var(--p-gold-0))}
+.p-sub i.flip{background:linear-gradient(to left,var(--p-gold),var(--p-gold-0))}
 .p-sub span{font-family:'Frank Ruhl Libre',serif;font-size:25px;font-weight:700;color:var(--p-ink);
-  letter-spacing:.5px;white-space:nowrap}
-.p-meta{text-align:center;font-size:19px;color:var(--p-ink);font-weight:500;letter-spacing:.2px;line-height:1.6}
-.p-meta b{display:inline-block;width:11px;height:10px;margin:0 10px;vertical-align:1px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='10' viewBox='0 0 11 10'%3E%3Cpath d='M5.5 0l5 5-5 5-5-5z' fill='%23c9a24a'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:center}
+  white-space:nowrap}
+.p-head-main .p-sub{margin-top:6px}
+.p-head-main .p-sub span{color:var(--p-ink-soft);font-size:23px}
+.p-meta{text-align:center;font-size:19px;color:var(--p-ink);font-weight:500;letter-spacing:.2px;line-height:1.6;margin-top:2px}
+.p-meta b{display:inline-block;width:6px;height:6px;margin:0 11px;vertical-align:3px;transform:rotate(45deg);
+  background:linear-gradient(135deg,var(--p-gold-soft),var(--p-gold-deep))}
 .p-meta-2{margin-top:5px;text-align:center;font-size:15px;color:var(--p-ink-soft);font-weight:400}
 
-.p-banner{margin-top:18px;text-align:center;font-size:19px;font-weight:700;color:var(--p-on-gold);
+.p-banner{margin-top:22px;text-align:center;font-size:19px;font-weight:700;color:var(--p-on-gold);
   background:linear-gradient(180deg,var(--p-gold-soft),var(--p-gold));
-  border:1px solid var(--p-gold-deep);border-radius:7px;padding:11px 16px;letter-spacing:.2px}
+  border:2px solid var(--p-gold-deep);border-radius:11px;padding:11px 16px}
 
 /* ---- גוף הלוח ---- */
-.p-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:12px 0}
+/* חותם עמום במרכז אזור הזמנים: כשיש מעט זמנים הלוח נראה מכוון ולא ריק */
+.p-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px;padding:16px 0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' viewBox='0 0 420 420'%3E%3Cg fill='none' stroke='%23a8822e' stroke-opacity='.09'%3E%3Ccircle cx='210' cy='210' r='204' stroke-width='2.5'/%3E%3Ccircle cx='210' cy='210' r='194' stroke-width='1'/%3E%3Cpath d='M210 60 80.1 285.0h259.8ZM210 360 80.1 135.0h259.8Z' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M210 60 80.1 285.0h259.8ZM210 360 80.1 135.0h259.8Z' stroke-width='1' stroke-opacity='.08' transform='translate%28210 210%29 scale%28.86%29 translate%28-210 -210%29'/%3E%3C/g%3E%3C/svg%3E") no-repeat center/420px 420px}
 .p-sections{display:grid;gap:26px}
-.p-sections.grid-2{grid-template-columns:1fr 1fr;gap:22px;align-items:start}
-.p-card-head{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px}
-.p-card-head i{flex:1;height:12px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='12' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M0 6h104' stroke='%23c9a24a' stroke-width='1.3'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:center;background-size:100% 12px}
-.p-card-head b{flex:0 0 auto;width:13px;height:12px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='12' viewBox='0 0 13 12'%3E%3Cpath d='M6.5 0l6 6-6 6-6-6z' fill='%23c9a24a'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:center}
+.p-sections.grid-2{grid-template-columns:1fr 1fr;gap:22px 18px;align-items:start}
+/* מפריד כותרת: קו מוזהב שדוהה החוצה, מעוין, כותרת, מעוין, קו */
+.p-card-head,.p-notes-head{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px}
+.p-card-head i,.p-notes-head i{flex:1;height:1.5px;
+  /* שני הפיקסלים הראשונים שקופים: html2canvas מצייר שוב את עמודת הפתיחה בקצה השני,
+     ואם היא מוזהבת נשארת נקודה תועה בסוף הקו */
+  background:linear-gradient(to right,var(--p-gold-0) 2px,var(--p-gold) 2px,var(--p-gold-0))}
+.p-card-head i:last-child,.p-notes-head i:last-child{background:linear-gradient(to left,var(--p-gold-0) 2px,var(--p-gold) 2px,var(--p-gold-0))}
+.p-card-head b,.p-notes-head b{flex:0 0 auto;width:8px;height:8px;transform:rotate(45deg);
+  background:linear-gradient(135deg,var(--p-gold-soft),var(--p-gold) 50%,var(--p-gold-deep))}
 .p-card-head span{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:27px;color:var(--p-ink);
   letter-spacing:.4px;white-space:nowrap}
 .p-card-body{padding:0 2px}
-.p-row{display:flex;align-items:baseline;gap:12px;padding:12px 6px;border-bottom:1px solid var(--p-rule)}
+.p-row{display:flex;align-items:baseline;gap:12px;padding:16px 6px;border-bottom:1px solid var(--p-rule)}
 .p-row:last-child{border-bottom:0}
-.p-label{font-size:30px;font-weight:700;color:var(--p-ink);line-height:1.2;flex:0 1 auto;min-width:0;max-width:66%}
+.p-label{font-size:40px;font-weight:700;color:var(--p-ink);line-height:1.2;flex:0 1 auto;min-width:0;max-width:66%}
 .p-note{display:block;font-size:14px;color:var(--p-ink-soft);font-weight:400;margin-top:4px}
 .p-dots{flex:1;height:10px;min-width:16px;opacity:.75;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='10' viewBox='0 0 9 10'%3E%3Ccircle cx='4.5' cy='6' r='1.15' fill='%23b08a2c'/%3E%3C/svg%3E");
   background-repeat:repeat-x;background-position:right center}
-.p-time{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:38px;color:var(--p-time);
-  letter-spacing:.5px;flex:0 0 auto;font-variant-numeric:tabular-nums}
+/* בלי tabular-nums: html2canvas מצייר "18", ":" ו-"20" כמילים נפרדות במיקום
+   שמדד הדפדפן, אך canvas מתעלם מספרות טבלאיות — ונפתח רווח לפני הנקודתיים. */
+.p-time{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:40px;color:var(--p-time);
+  flex:0 0 auto}
 .p-time.txt{font-size:21px;font-weight:700}
 /* בפריסת שתי עמודות יש פחות רוחב — הטיפוגרפיה מוקטנת בהתאם */
 .p-sections.grid-2 .p-card-head{gap:9px;margin-bottom:4px}
 .p-sections.grid-2 .p-card-head span{font-size:21px}
-.p-sections.grid-2 .p-row{padding:10px 2px;gap:8px}
-.p-sections.grid-2 .p-label{font-size:21px;max-width:62%}
+.p-sections.grid-2 .p-row{padding:10px 2px;gap:6px}
+.p-sections.grid-2 .p-label{font-size:25px;max-width:74%}
 .p-sections.grid-2 .p-note{font-size:12px;margin-top:2px}
-.p-sections.grid-2 .p-time{font-size:27px}
+.p-sections.grid-2 .p-time{font-size:25px}
 .p-sections.grid-2 .p-time.txt{font-size:16px}
-.p-sections.grid-2 .p-dots{min-width:10px}
+.p-sections.grid-2 .p-dots{min-width:8px}
+/* מעט זמנים (עד שלושה בקבוצה אחת, או עד שניים בכל אחת משתי קבוצות) —
+   שורות מרווחות וגדולות יותר, כדי שהלוח לא ייראה ריק */
+.p-sections:not(.grid-2):not(:has(> .p-card ~ .p-card)):not(:has(.p-row:nth-of-type(4))) .p-row,
+.p-sections:not(.grid-2):not(:has(> .p-card ~ .p-card ~ .p-card)):not(:has(.p-row:nth-of-type(3))) .p-row{padding:26px 8px}
+.p-sections:not(.grid-2):not(:has(> .p-card ~ .p-card)):not(:has(.p-row:nth-of-type(4))) .p-label,
+.p-sections:not(.grid-2):not(:has(> .p-card ~ .p-card ~ .p-card)):not(:has(.p-row:nth-of-type(3))) .p-label{font-size:34px}
+.p-sections:not(.grid-2):not(:has(> .p-card ~ .p-card)):not(:has(.p-row:nth-of-type(4))) .p-time:not(.txt),
+.p-sections:not(.grid-2):not(:has(> .p-card ~ .p-card ~ .p-card)):not(:has(.p-row:nth-of-type(3))) .p-time:not(.txt){font-size:46px}
+.p-sections:not(.grid-2):not(:has(> .p-card ~ .p-card)):not(:has(.p-row:nth-of-type(4))) .p-card-head span,
+.p-sections:not(.grid-2):not(:has(> .p-card ~ .p-card ~ .p-card)):not(:has(.p-row:nth-of-type(3))) .p-card-head span{font-size:30px}
 
 /* ---- הודעות ---- */
 .p-notes{padding:0 4px}
-.p-notes-head{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px}
-.p-notes-head i{flex:1;height:12px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='12' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M0 6h104' stroke='%23c9a24a' stroke-width='1.3'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:center;background-size:100% 12px}
-.p-notes-head b{flex:0 0 auto;width:13px;height:12px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='12' viewBox='0 0 13 12'%3E%3Cpath d='M6.5 0l6 6-6 6-6-6z' fill='%23c9a24a'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:center}
+.p-notes-head{margin-bottom:10px}
 .p-notes-head span{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:22px;color:var(--p-ink);letter-spacing:1px}
 .p-notes-body{white-space:pre-line;text-align:center;font-size:19px;line-height:1.7;
   color:var(--p-ink);font-weight:400}
 
 /* ---- רגל הלוח ---- */
 .p-foot{text-align:center;padding-top:6px}
-.p-foot-orn{height:26px;margin:0 auto 8px;max-width:230px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='230' height='26' viewBox='0 0 230 26'%3E%3Cg fill='none' stroke='%23c9a24a' stroke-width='1.5'%3E%3Cpath d='M8 14c26 0 40-8 58-8'/%3E%3Cpath d='M222 14c-26 0-40-8-58-8'/%3E%3C/g%3E%3Cpath d='M115 4l7 7-7 7-7-7z' fill='%23c9a24a'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:center}
+.p-foot-orn{width:300px;height:40px;margin:0 auto 10px;transform:scaleY(-1)}
 .p-blessing{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:42px;color:var(--p-ink);
-  letter-spacing:2px}
+  letter-spacing:2px;line-height:1.25}
 .p-ded{margin-top:10px;font-size:15px;color:var(--p-ink-soft);font-weight:400;line-height:1.6}
 .p-addr{margin-top:8px;font-size:16px;color:var(--p-gold-deep);font-weight:500;letter-spacing:.4px}
 </style>
@@ -180,27 +218,28 @@ body{display:flex;justify-content:center;padding:24px 0}
 <body>
 
 <div class="poster" id="poster">
-              <div class="p-star"></div>
-              <div class="p-corner tl"></div>
-              <div class="p-corner tr"></div>
-              <div class="p-corner bl"></div>
-              <div class="p-corner br"></div>
+              <!-- העיטורים הם SVG מוטמע ולא תמונת רקע: html2canvas מצייר תמונות רקע
+                   ברזולוציה 1:1 ומגדיל אותן (מטושטש), ואילו SVG מוטמע מצויר חד. -->
+              <div class="p-star"><svg width="90" height="90" viewBox="0 0 90 90" aria-hidden="true"><defs><linearGradient id="pg-star" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="90" y2="90"><stop class="h" offset="0"></stop><stop class="m" offset=".32"></stop><stop class="l" offset=".55"></stop><stop class="m" offset=".78"></stop><stop class="h" offset="1"></stop></linearGradient></defs><path class="fill" d="M45 5 10.36 65h69.28ZM45 85 10.36 25h69.28Z"></path><path d="M45 5 10.36 65h69.28ZM45 85 10.36 25h69.28Z" fill="none" stroke="url(#pg-star)" stroke-width="3.6" stroke-linejoin="round"></path><path class="shine" d="M45 5 10.36 65h69.28ZM45 85 10.36 25h69.28Z" fill="none" stroke-width=".9" stroke-linejoin="round"></path></svg></div>
+              <div class="p-corner tl"><svg width="180" height="180" viewBox="0 0 180 180" aria-hidden="true"><defs><linearGradient id="pg-tl" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="180" y2="180"><stop class="h" offset="0"></stop><stop class="m" offset=".32"></stop><stop class="l" offset=".55"></stop><stop class="m" offset=".78"></stop><stop class="h" offset="1"></stop></linearGradient></defs><g id="pa-tl" transform="translate(-3 -3) scale(1.22)"><path d="M30 26C48 21.5 65 22 76 30C85 37 85 49 76 51C69 52.5 65 46 69 42C71.5 39.5 75.5 41 75 44" fill="none" stroke="url(#pg-tl)" stroke-width="2" stroke-linecap="round"></path><path d="M61 24.6C88 20 112 22 138 26.5" fill="none" stroke="url(#pg-tl)" stroke-width="1.3" stroke-linecap="round"></path><path d="M96 22.6C104 17 112 16.6 118 18" fill="none" stroke="url(#pg-tl)" stroke-width="1.1" stroke-linecap="round"></path><path transform="translate(44 23) rotate(-32) scale(1)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"></path><path transform="translate(56 25.6) rotate(30) scale(0.9)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"></path><path transform="translate(86 22) rotate(-26) scale(0.85)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"></path><path transform="translate(108 23.4) rotate(18) scale(0.75)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"></path><circle cx="142" cy="27" r="1.7" fill="url(#pg-tl)"></circle></g><use href="#pa-tl" transform="matrix(0 1 1 0 0 0)"></use><path d="M14 3 25 14 14 25 3 14Z" fill="url(#pg-tl)"></path><path class="cut" d="M14 8.6 19.4 14 14 19.4 8.6 14Z"></path><circle cx="14" cy="14" r="1.7" fill="url(#pg-tl)"></circle><path transform="translate(28 28) rotate(45) scale(1.35)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tl)"></path><circle cx="53" cy="53" r="2" fill="url(#pg-tl)"></circle></svg></div>
+              <div class="p-corner tr"><svg width="180" height="180" viewBox="0 0 180 180" aria-hidden="true"><defs><linearGradient id="pg-tr" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="180" y2="180"><stop class="h" offset="0"></stop><stop class="m" offset=".32"></stop><stop class="l" offset=".55"></stop><stop class="m" offset=".78"></stop><stop class="h" offset="1"></stop></linearGradient></defs><g id="pa-tr" transform="translate(-3 -3) scale(1.22)"><path d="M30 26C48 21.5 65 22 76 30C85 37 85 49 76 51C69 52.5 65 46 69 42C71.5 39.5 75.5 41 75 44" fill="none" stroke="url(#pg-tr)" stroke-width="2" stroke-linecap="round"></path><path d="M61 24.6C88 20 112 22 138 26.5" fill="none" stroke="url(#pg-tr)" stroke-width="1.3" stroke-linecap="round"></path><path d="M96 22.6C104 17 112 16.6 118 18" fill="none" stroke="url(#pg-tr)" stroke-width="1.1" stroke-linecap="round"></path><path transform="translate(44 23) rotate(-32) scale(1)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"></path><path transform="translate(56 25.6) rotate(30) scale(0.9)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"></path><path transform="translate(86 22) rotate(-26) scale(0.85)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"></path><path transform="translate(108 23.4) rotate(18) scale(0.75)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"></path><circle cx="142" cy="27" r="1.7" fill="url(#pg-tr)"></circle></g><use href="#pa-tr" transform="matrix(0 1 1 0 0 0)"></use><path d="M14 3 25 14 14 25 3 14Z" fill="url(#pg-tr)"></path><path class="cut" d="M14 8.6 19.4 14 14 19.4 8.6 14Z"></path><circle cx="14" cy="14" r="1.7" fill="url(#pg-tr)"></circle><path transform="translate(28 28) rotate(45) scale(1.35)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-tr)"></path><circle cx="53" cy="53" r="2" fill="url(#pg-tr)"></circle></svg></div>
+              <div class="p-corner bl"><svg width="60" height="60" viewBox="0 0 60 60" aria-hidden="true"><defs><linearGradient id="pg-bl" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="60" y2="60"><stop class="h" offset="0"></stop><stop class="m" offset=".32"></stop><stop class="l" offset=".55"></stop><stop class="m" offset=".78"></stop><stop class="h" offset="1"></stop></linearGradient></defs><g id="ps-bl"><path transform="translate(27 14) rotate(-16) scale(0.8)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-bl)"></path><path transform="translate(27 14) rotate(16) scale(0.8)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-bl)"></path><circle cx="44" cy="14" r="1.5" fill="url(#pg-bl)"></circle></g><use href="#ps-bl" transform="matrix(0 1 1 0 0 0)"></use><path d="M14 3 25 14 14 25 3 14Z" fill="url(#pg-bl)"></path><path class="cut" d="M14 8.6 19.4 14 14 19.4 8.6 14Z"></path><circle cx="14" cy="14" r="1.7" fill="url(#pg-bl)"></circle></svg></div>
+              <div class="p-corner br"><svg width="60" height="60" viewBox="0 0 60 60" aria-hidden="true"><defs><linearGradient id="pg-br" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="60" y2="60"><stop class="h" offset="0"></stop><stop class="m" offset=".32"></stop><stop class="l" offset=".55"></stop><stop class="m" offset=".78"></stop><stop class="h" offset="1"></stop></linearGradient></defs><g id="ps-br"><path transform="translate(27 14) rotate(-16) scale(0.8)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-br)"></path><path transform="translate(27 14) rotate(16) scale(0.8)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-br)"></path><circle cx="44" cy="14" r="1.5" fill="url(#pg-br)"></circle></g><use href="#ps-br" transform="matrix(0 1 1 0 0 0)"></use><path d="M14 3 25 14 14 25 3 14Z" fill="url(#pg-br)"></path><path class="cut" d="M14 8.6 19.4 14 14 19.4 8.6 14Z"></path><circle cx="14" cy="14" r="1.7" fill="url(#pg-br)"></circle></svg></div>
 
               <div class="poster-frame">
                 <div class="bsd">בס"ד</div>
 
                 <div class="p-head">
-                  <div class="p-crown"></div>
-                  <h1 class="p-title">בית כנסת יחזקאל</h1>
-                  <div class="p-sub">
-                    <i></i><span>לוח זמני התפילות</span><i class="flip"></i>
-                  </div>
-
+                  <div class="p-crown"><svg width="300" height="40" viewBox="0 0 300 40" aria-hidden="true"><defs><linearGradient id="pg-crown" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="300" y2="40"><stop class="h" offset="0"></stop><stop class="m" offset=".32"></stop><stop class="l" offset=".55"></stop><stop class="m" offset=".78"></stop><stop class="h" offset="1"></stop></linearGradient></defs><g id="pr-crown"><path d="M165 20C179 20 185 11 199 11C215 11 219 27 235 27C251 27 257 15.5 273 16.5C283 17 287.5 24.5 281.5 27.6C276.5 30 272.5 25 276.5 23.2" fill="none" stroke="url(#pg-crown)" stroke-width="1.9" stroke-linecap="round"></path><path d="M199 11C209 5.6 221 5.4 230 8.6" fill="none" stroke="url(#pg-crown)" stroke-width="1.1" stroke-linecap="round"></path><path transform="translate(184 15.5) rotate(-38) scale(0.75)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-crown)"></path><path transform="translate(218 21) rotate(44) scale(0.75)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-crown)"></path><path transform="translate(250 22.5) rotate(-36) scale(0.7)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-crown)"></path><circle cx="292" cy="20" r="1.6" fill="url(#pg-crown)"></circle></g><use href="#pr-crown" transform="matrix(-1 0 0 1 300 0)"></use><path d="M150 8 162 20 150 32 138 20Z" fill="url(#pg-crown)"></path><path class="cut" d="M150 13.6 156.4 20 150 26.4 143.6 20Z"></path><circle cx="150" cy="20" r="1.6" fill="url(#pg-crown)"></circle></svg></div>
                   <div class="p-head-row">
                     <div class="p-head-side"></div>
                     <div class="p-head-main">
+                      <h1 class="p-title">בית כנסת יחזקאל</h1>
+                      <div class="p-sub">
+                        <i></i><span>לוח זמני התפילות</span><i class="flip"></i>
+                      </div>
                       <div class="p-meta">
-                        <span><span>האזינו</span></span><span><b></b><span>ח׳ בתשרי תשפ״ז</span></span>
+                        <span><span>פרשת נח</span></span><span><b></b><span>ו׳ בחשוון תשפ״ז</span></span>
                       </div>
                       
                     </div>
@@ -279,7 +318,7 @@ body{display:flex;justify-content:center;padding:24px 0}
                 </div>
 
                 <div class="p-foot">
-                  <div class="p-foot-orn"></div>
+                  <div class="p-foot-orn"><svg width="300" height="40" viewBox="0 0 300 40" aria-hidden="true"><defs><linearGradient id="pg-foot" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="300" y2="40"><stop class="h" offset="0"></stop><stop class="m" offset=".32"></stop><stop class="l" offset=".55"></stop><stop class="m" offset=".78"></stop><stop class="h" offset="1"></stop></linearGradient></defs><g id="pr-foot"><path d="M165 20C179 20 185 11 199 11C215 11 219 27 235 27C251 27 257 15.5 273 16.5C283 17 287.5 24.5 281.5 27.6C276.5 30 272.5 25 276.5 23.2" fill="none" stroke="url(#pg-foot)" stroke-width="1.9" stroke-linecap="round"></path><path d="M199 11C209 5.6 221 5.4 230 8.6" fill="none" stroke="url(#pg-foot)" stroke-width="1.1" stroke-linecap="round"></path><path transform="translate(184 15.5) rotate(-38) scale(0.75)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-foot)"></path><path transform="translate(218 21) rotate(44) scale(0.75)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-foot)"></path><path transform="translate(250 22.5) rotate(-36) scale(0.7)" d="M0 0C3.5-4.6 10-5.4 15 0C10 5.4 3.5 4.6 0 0Z" fill="url(#pg-foot)"></path><circle cx="292" cy="20" r="1.6" fill="url(#pg-foot)"></circle></g><use href="#pr-foot" transform="matrix(-1 0 0 1 300 0)"></use><path d="M150 8 162 20 150 32 138 20Z" fill="url(#pg-foot)"></path><path class="cut" d="M150 13.6 156.4 20 150 26.4 143.6 20Z"></path><circle cx="150" cy="20" r="1.6" fill="url(#pg-foot)"></circle></svg></div>
                   <div class="p-blessing">שבת שלום ומבורך</div>
                   <div class="p-ded">לעילוי נשמת רבקה בת שרה ז״ל</div>
                   <div class="p-addr">רחוב הרב קוק 12, פתח תקווה</div>
