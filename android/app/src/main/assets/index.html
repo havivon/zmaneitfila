@@ -215,8 +215,11 @@ button:focus-visible,.tdot:focus-visible{outline:2px solid var(--gold-soft);outl
 .p-sections.grid-2{grid-template-columns:1fr 1fr;gap:22px 18px;align-items:start}
 /* מפריד כותרת: קו מוזהב שדוהה החוצה, מעוין, כותרת, מעוין, קו */
 .p-card-head,.p-notes-head{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px}
-.p-card-head i,.p-notes-head i{flex:1;height:1.5px;background:linear-gradient(to right,var(--p-gold),var(--p-gold-0))}
-.p-card-head i:last-child,.p-notes-head i:last-child{background:linear-gradient(to left,var(--p-gold),var(--p-gold-0))}
+.p-card-head i,.p-notes-head i{flex:1;height:1.5px;
+  /* שני הפיקסלים הראשונים שקופים: html2canvas מצייר שוב את עמודת הפתיחה בקצה השני,
+     ואם היא מוזהבת נשארת נקודה תועה בסוף הקו */
+  background:linear-gradient(to right,var(--p-gold-0) 2px,var(--p-gold) 2px,var(--p-gold-0))}
+.p-card-head i:last-child,.p-notes-head i:last-child{background:linear-gradient(to left,var(--p-gold-0) 2px,var(--p-gold) 2px,var(--p-gold-0))}
 .p-card-head b,.p-notes-head b{flex:0 0 auto;width:8px;height:8px;transform:rotate(45deg);
   background:linear-gradient(135deg,var(--p-gold-soft),var(--p-gold) 50%,var(--p-gold-deep))}
 .p-card-head span{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:27px;color:var(--p-ink);
