@@ -2,18 +2,19 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <!-- קשת קלף ומגן דוד, בהשראת לוח התפילות -->
-    <path android:pathData="M22,88 L22,53 C22,32 37,19 54,19 C71,19 86,32 86,53 L86,88"
-        android:strokeColor="#D5B25E" android:strokeWidth="4"
+    <!-- קשת ומגן דוד, בהשראת לוח התפילות. כל הציור בתוך אזור הבטיחות של
+         סמל אדפטיבי (עיגול ברדיוס 33 סביב 54,54), כדי שלא ייחתך במסכה עגולה. -->
+    <path android:pathData="M37,78 L37,46 A17,17 0 0 1 71,46 L71,78"
+        android:strokeColor="#D8B25C" android:strokeWidth="3.4"
         android:strokeLineCap="round" android:strokeLineJoin="round"
         android:fillColor="#00000000" />
-    <path android:pathData="M29,87 L29,54 C29,37 41,27 54,27 C67,27 79,37 79,54 L79,87"
-        android:strokeColor="#9A752F" android:strokeWidth="1.5"
+    <path android:pathData="M41.8,78 L41.8,46.5 A12.2,12.2 0 0 1 66.2,46.5 L66.2,78"
+        android:strokeColor="#9C7427" android:strokeWidth="1.2"
         android:fillColor="#00000000" />
-    <path android:pathData="M54,34 L38,62 L70,62 Z M54,68 L38,40 L70,40 Z"
-        android:strokeColor="#F0D58B" android:strokeWidth="3"
-        android:strokeLineJoin="round" android:fillColor="#00000000" />
-    <path android:pathData="M39,74 L69,74 M43,82 L65,82"
-        android:strokeColor="#F0D58B" android:strokeWidth="2.5"
+    <path android:pathData="M36,80.6 L72,80.6"
+        android:strokeColor="#D8B25C" android:strokeWidth="2.6"
         android:strokeLineCap="round" />
+    <path android:pathData="M54,43 L44.47,59.5 L63.53,59.5 Z M54,65 L44.47,48.5 L63.53,48.5 Z"
+        android:strokeColor="#FBE7A6" android:strokeWidth="2.4"
+        android:strokeLineJoin="round" android:fillColor="#00000000" />
 </vector>
