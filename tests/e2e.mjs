@@ -452,7 +452,12 @@ test('export.ornaments', 'נאמנות הייצוא: כל העיטורים (מג
       const Bi = await __qa.imgData(B);
       const c = (img) => __qa.crop(img, r.x * 1.5, r.y * 1.5, r.w * 1.5, r.h * 1.5);
       const a = c(window.__qaA), b = c(Bi), e = c(window.__qaE);
-      return { ...__qa.presence(a, b, e, 40), png: __qa.side([a, e], 2) };
+      /* ביקורת: "ייצוא" שחסר בו הקישוט (b עצמו) חייב לקבל ציון נמוך באותה סבולת היסט,
+         אחרת המדד אינו מבחין. סבולת 0, ואם אינה מספיקה — ±1px ואז ±2px (קווי שערה שזזים
+         בתת-פיקסל נתנו בסבולת ±1 תוצאה לא יציבה: 50% או 100% לסירוגין). */
+      const tries = [0, 1, 2].map(R => ({ R, ...__qa.presence(a, b, e, 40, R), control: __qa.presence(a, b, b, 40, R).score }));
+      const ok = tries.find(t => t.score >= 0.75 && t.control <= 0.2);
+      return { ...(ok || tries[0]), valid: tries.some(t => t.control <= 0.2), png: __qa.side([a, e], 2) };
     }, [B, rect]);
     const idx = res.length;
     m.file = saveDataUrl(m.png, `ornament-${String(idx).padStart(2, '0')}.png`); delete m.png;
@@ -462,6 +467,7 @@ test('export.ornaments', 'נאמנות הייצוא: כל העיטורים (מג
   for (const r of res) {
     if (r.err) { bad.push(r.name + ': ' + r.err); continue; }
     if (r.mask < 30) { bad.push(`${r.name}: הקישוט כמעט אינו נראה בלוח החי (${r.mask} פיקסלים — בדיקה לא תקפה)`); continue; }
+    if (!r.valid) { bad.push(`${r.name}: המדד אינו מבחין בקישוט חסר (ביקורת ${r1(r.control)}) — בדיקה לא תקפה`); continue; }
     /* רוב פיקסלי הקישוט צריכים להופיע גם בתמונה המיוצאת */
     if (r.score < 0.75) bad.push(`${r.name}: רק ${Math.round(r.score * 100)}% מפיקסלי הקישוט מופיעים בייצוא (חי | ייצוא: ${r.file})`);
   }
@@ -678,7 +684,8 @@ for (const w of [360, 390, 430]) {
 
 test('ui.topbar', 'סרגל עליון: "שתף בוואטסאפ" ו"הורדה" באותה שורה ובאותו גודל; "תצוגה מקדימה" בראש מסגרת התצוגה', ['R8'], async () => {
   const out = [];
-  for (const vp of [{ width: 360, height: 760 }, { width: 390, height: 844 }, { width: 430, height: 900 }, { width: 1400, height: 900 }]) {
+  const bad = [];
+  for (const vp of [{ width: 320, height: 640 }, { width: 360, height: 760 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 412, height: 915 }, { width: 430, height: 900 }, { width: 1400, height: 900 }]) {
     const page = await open({ mobile: vp.width < 800, viewport: vp });
     const st = await app(page, () => {
       const wa = document.querySelector('.topbar .btn-wa'), dl = [...document.querySelectorAll('.topbar .btn')].find(b => b.textContent.includes('הורדה'));
@@ -688,16 +695,17 @@ test('ui.topbar', 'סרגל עליון: "שתף בוואטסאפ" ו"הורדה"
         prevInHead: prev.length === 1 && !!prev[0].closest('.stage-head'), prevInTop: prev.some(x => x.closest('.topbar')),
         topBtns: document.querySelectorAll('.topbar button').length };
     });
+    if (vp.width < 800) await page.screenshot({ path: path.join(OUT, `topbar-${vp.width}.png`), clip: { x: 0, y: 0, width: vp.width, height: 170 } });
     check(st.ok, 'כפתורי השיתוף/ההורדה חסרים');
     check(st.waText.includes('שתף בוואטסאפ'), 'כיתוב כפתור השיתוף: ' + st.waText);
-    check(Math.abs(st.a.width - st.b.width) <= 1 && Math.abs(st.a.height - st.b.height) <= 1, `${vp.width}px: גדלים שונים ${r1(st.a.width)}×${r1(st.a.height)} מול ${r1(st.b.width)}×${r1(st.b.height)}`);
-    check(Math.abs(st.a.top - st.b.top) <= 1, `${vp.width}px: הכפתורים אינם באותה שורה`);
+    if (!(Math.abs(st.a.width - st.b.width) <= 1 && Math.abs(st.a.height - st.b.height) <= 1)) bad.push(`${vp.width}px: גדלים שונים — וואטסאפ ${r1(st.a.width)}×${r1(st.a.height)}, הורדה ${r1(st.b.width)}×${r1(st.b.height)} (tests/out/topbar-${vp.width}.png)`);
+    if (!(Math.abs(st.a.top - st.b.top) <= 1)) bad.push(`${vp.width}px: הכפתורים אינם באותה שורה`);
     check(st.prevInHead && !st.prevInTop, `${vp.width}px: כפתור התצוגה המקדימה אינו (רק) ב-.stage-head`);
     check(st.topBtns === 2, `${vp.width}px: בסרגל העליון ${st.topBtns} כפתורים (צריך 2)`);
-    out.push(`${vp.width}: ${Math.round(st.a.width)}×${Math.round(st.a.height)}`);
-    if (vp.width === 390) await page.screenshot({ path: path.join(OUT, 'topbar-390.png'), clip: { x: 0, y: 0, width: 390, height: 200 } });
+    out.push(`${vp.width}: ${Math.round(st.a.width)}/${Math.round(st.b.width)}`);
   }
-  return out.join(', ');
+  check(bad.length === 0, bad.join('; '));
+  return 'רוחב וואטסאפ/הורדה: ' + out.join(', ');
 });
 
 /* ---------- תצוגה מקדימה ---------- */
@@ -790,9 +798,13 @@ test('timepicker.wheel-and-text', 'בורר השעה: נפתח בהקשה על �
   /* גלילת מגע אמיתית בגלגל הדקות — 5 שורות למטה */
   const mw = await center(page.locator('.tp-wheel').nth(1));
   const cdp = await page.context().newCDPSession(page);
-  await cdp.send('Input.synthesizeScrollGesture', { x: Math.round(mw.x), y: Math.round(mw.y + 40), yDistance: -46 * 5, speed: 400, gestureSourceType: 'touch', preventFling: true });
+  const sx = mw.x, sy = mw.y + 60;
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: sx, y: sy }] });
+  for (let i = 1; i <= 20; i++) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: sx, y: sy - 46 * 5 * i / 20 }] }); await sleep(16); }
+  await sleep(100);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await cdp.detach();
-  await settle(900);
+  await settle(1000);
   s = await it();
   const disp = await page.locator('.tp-display').textContent();
   check(/^19:(2[3-7])$/.test(s.time), 'גלילת הדקות לא שינתה את השעה כמצופה (צפוי ~19:25): ' + s.time);
@@ -811,7 +823,7 @@ test('timepicker.wheel-and-text', 'בורר השעה: נפתח בהקשה על �
   s = await it();
   check(s.time === wheelTime && !s.freeText, 'מחיקת הטקסט לא החזירה את השעה: ' + s.time);
   await page.keyboard.type('אחרי השיעור');
-  await tapEl(page, page.locator('.modal-actions .btn', { hasText: 'אישור' }));
+  await tapEl(page, page.locator('.tp-card .modal-actions .btn', { hasText: 'אישור' }));
   await settle(400);
   check(!(await app(page, () => __qa.app().tp.open)), 'אישור לא סגר את הבורר');
   s = await it();

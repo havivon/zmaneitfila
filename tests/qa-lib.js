@@ -100,18 +100,18 @@
       return c.toDataURL('image/png');
     },
     /* כמה מפיקסלי הקישוט (היכן ש-a שונה מ-b) נמצאים גם ב-e: לכל פיקסל במסכה בודקים
-       אם e קרוב יותר ל-a (הלוח עם הקישוט) מאשר ל-b (הלוח בלעדיו). מחפשים היסט של ±1px
-       כדי שעיגול של תת-פיקסל לא ייחשב כחוסר. */
-    presence(a, b, e, thr = 60) {
+       אם e קרוב יותר ל-a (הלוח עם הקישוט) מאשר ל-b (הלוח בלעדיו). מחפשים היסט כולל של
+       עד ±R פיקסלים, כדי שעיגול של תת-פיקסל לא ייחשב כחוסר. */
+    presence(a, b, e, thr = 60, R = 1) {
       const w = Math.min(a.w, b.w, e.w), h = Math.min(a.h, b.h, e.h);
       const dd = (P, i, Q, j) => Math.abs(P.data[i] - Q.data[j]) + Math.abs(P.data[i + 1] - Q.data[j + 1]) + Math.abs(P.data[i + 2] - Q.data[j + 2]);
       const mask = [];
-      for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+      for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) {
         const i = (y * a.w + x) * 4;
         if (dd(a, i, b, (y * b.w + x) * 4) > thr) mask.push([x, y]);
       }
       let best = { score: 0, dx: 0, dy: 0 };
-      for (const dy of [-1, 0, 1]) for (const dx of [-1, 0, 1]) {
+      for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
         let ok = 0;
         for (const [x, y] of mask) {
           const i = (y * a.w + x) * 4, j = (y * b.w + x) * 4, k = ((y + dy) * e.w + x + dx) * 4;
