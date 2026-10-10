@@ -650,7 +650,10 @@ test('poster.arch-name', 'שם בית הכנסת כולו בתוך הקשת וא
 });
 
 test('poster.portrait', 'הדיוקן בצד הכותרת, מאופק (לא דומיננטי); אין "ע״ש הבן איש חי" בשום מקום', ['R2'], async () => {
-  const src = fs.readFileSync(SRC, 'utf8');
+  /* שורה אחת מותרת: ההמרה שמנקה את כותרת המשנה הזו מנתונים שנשמרו בגרסה הראשונה
+     (מסומנת "ברירת המחדל של הגרסה הראשונה"). persist.old-format בודק שהיא אכן מנוקה */
+  const src = fs.readFileSync(SRC, 'utf8').split('\n')
+    .filter(l => !l.includes('ברירת המחדל של הגרסה הראשונה')).join('\n');
   check(!/ע["״׳']?ש\s*הבן\s*איש\s*חי/.test(src), 'הכיתוב "ע"ש הבן איש חי" נמצא ב-index.html');
   const page = await open();
   const st = await app(page, () => {
@@ -667,7 +670,7 @@ test('poster.portrait', 'הדיוקן בצד הכותרת, מאופק (לא דו
   return `שטח ${r1(st.area * 100)}%, מרכז ב-${Math.round(st.cx * 100)}% מהרוחב`;
 });
 
-test('poster.label-size', 'שם התפילה גדול ובולט כמו השעה (גובה האותיות ≥ 90% מגובה הספרות)', ['R4'], async () => {
+test('poster.label-size', 'שם התפילה בגודל גופן השעה, ובגובה אותיות של 80% לפחות מגובה הספרות', ['R4'], async () => {
   const page = await open({ dpr: 1.5 });
   const res = [];
   for (const layout of ['list', 'grid']) {
@@ -691,7 +694,9 @@ test('poster.label-size', 'שם התפילה גדול ובולט כמו השעה
   }
   check(res.length >= 4, 'לא נמצאו שורות למדידה');
   const desc = res.map(x => `${x.layout}: "${x.label}" ${x.lh}px (${x.lfs}) מול ${x.th}px (${x.tfs}) = ${Math.round(x.ratio * 100)}%`);
-  const bad = res.filter(x => x.ratio < 0.9);
+  /* הדרישה של בעל הלוח: "פונט הכיתוב כמו השעות" — אותו גודל גופן. ספרות הגופן של השעה
+     גבוהות מאותיות עבריות באותו גודל, ולכן גובה הדיו נבדק רק כרצפה (80%), נגד נסיגה */
+  const bad = res.filter(x => parseFloat(x.lfs) < parseFloat(x.tfs) || x.ratio < 0.8);
   check(bad.length === 0, 'שם התפילה קטן מהשעה: ' + desc.join(' | '));
   return desc.join(' | ');
 });
@@ -1340,7 +1345,8 @@ test('persist.old-format', 'נתונים שמורים בפורמט ישן (הג�
   /* גם נתונים פגומים לא מפילים את העמוד */
   const bad = await open({ seed: '{"sections":[{"title":"x"' });
   check(await app(bad, () => document.querySelectorAll('#poster .p-row').length) > 0, 'נתונים פגומים השאירו לוח ריק');
-  if (st.text.includes('ע"ש הבן איש חי')) warn('נטען ומוצג תקין; אך כותרת המשנה הישנה "ע"ש הבן איש חי זיע"א" שנשמרה במכשירי משתמשים קיימים ממשיכה להופיע בלוח (אין הגירה), בניגוד לדרישה 2');
+  /* ההמרה ב‑normalize מחליפה את ברירת המחדל הישנה — מעתה זו דרישה, לא אזהרה (דרישה 2) */
+  check(!st.text.includes('ע"ש הבן איש חי'), 'כותרת המשנה הישנה "ע"ש הבן איש חי זיע"א" עדיין מוצגת בלוח');
 });
 
 /* ---------- שיתוף ---------- */

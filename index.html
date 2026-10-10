@@ -80,8 +80,10 @@ button:focus-visible,.tdot:focus-visible{outline:2px solid var(--gold-soft);outl
 .brand-t{font-size:19px;font-weight:800;letter-spacing:.2px;line-height:1.15}
 .brand-s{font-size:12.5px;color:var(--muted);font-weight:400}
 .topbar-actions{margin-inline-start:auto;display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-.share-pair{display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1 1 300px}
+.share-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;flex:1 1 300px}
 .share-pair .btn{width:100%;justify-content:center}
+/* במסך צר הכיתוב מתכווץ, כדי ששני הכפתורים יישארו ברוחב זהה */
+@media(max-width:380px){ .share-pair .btn{padding-inline:8px;font-size:13px;gap:6px} .share-pair .btn svg{width:15px;height:15px} }
 
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line-soft);
@@ -229,7 +231,7 @@ button:focus-visible,.tdot:focus-visible{outline:2px solid var(--gold-soft);outl
 .p-card-body{padding:0 2px}
 .p-row{display:flex;align-items:baseline;gap:12px;padding:16px 6px;border-bottom:1px solid var(--p-rule)}
 .p-row:last-child{border-bottom:0}
-.p-label{font-size:30px;font-weight:700;color:var(--p-ink);line-height:1.2;flex:0 1 auto;min-width:0;max-width:66%}
+.p-label{font-size:40px;font-weight:700;color:var(--p-ink);line-height:1.2;flex:0 1 auto;min-width:0;max-width:66%}
 .p-note{display:block;font-size:14px;color:var(--p-ink-soft);font-weight:400;margin-top:4px}
 .p-dots{flex:1;height:10px;min-width:16px;opacity:.75;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='10' viewBox='0 0 9 10'%3E%3Ccircle cx='4.5' cy='6' r='1.15' fill='%23b08a2c'/%3E%3C/svg%3E");
@@ -243,9 +245,9 @@ button:focus-visible,.tdot:focus-visible{outline:2px solid var(--gold-soft);outl
 .p-sections.grid-2 .p-card-head{gap:9px;margin-bottom:4px}
 .p-sections.grid-2 .p-card-head span{font-size:21px}
 .p-sections.grid-2 .p-row{padding:10px 2px;gap:6px}
-.p-sections.grid-2 .p-label{font-size:20px;max-width:74%}
+.p-sections.grid-2 .p-label{font-size:25px;max-width:74%}
 .p-sections.grid-2 .p-note{font-size:12px;margin-top:2px}
-.p-sections.grid-2 .p-time{font-size:27px}
+.p-sections.grid-2 .p-time{font-size:25px}
 .p-sections.grid-2 .p-time.txt{font-size:16px}
 .p-sections.grid-2 .p-dots{min-width:8px}
 /* מעט זמנים (עד שלושה בקבוצה אחת, או עד שניים בכל אחת משתי קבוצות) —
@@ -1128,6 +1130,7 @@ function normalize(raw, strict){
   }
   /* תמונה רק כ‑data URI — בלי משאב חיצוני ובלי תווים שישברו את ה‑style */
   if (typeof d.photo !== 'string' || !/^data:image\/[\w.+-]+;base64,[\w+/=]+$/.test(d.photo)) d.photo = null;
+  if (d.subtitle.trim() === 'ע"ש הבן איש חי זיע"א') d.subtitle = base.subtitle;   /* ברירת המחדל של הגרסה הראשונה */
   if (!THEMES[d.theme]) d.theme = base.theme;
   if (d.layout !== 'list' && d.layout !== 'grid') d.layout = base.layout;
   const seen = new Set();
@@ -1543,6 +1546,11 @@ document.addEventListener('alpine:init', () => {
         onclone: (doc) => {
           const sc = doc.getElementById('posterScaler');
           if (sc) sc.style.transform = 'none';
+          /* html2canvas מעתיק את העמוד, ואנימציית הכניסה מתחילה בעותק מחדש — הלוח היה
+             מצויר בהיסט תת-פיקסלי שונה בכל ייצוא, וקווי הזהב הדקים יצאו בעוצמה משתנה */
+          const still = doc.createElement('style');
+          still.textContent = '*,*::before,*::after{animation:none!important;transition:none!important}';
+          doc.head.appendChild(still);
           /* פאנל הניהול והחלונות אינם חלק מהתמונה — הסרתם מקצרת את הייצוא */
           doc.querySelectorAll('.panel,.topbar,.modal,.toast,.busy,.stage-head').forEach(el => el.remove());
         }
