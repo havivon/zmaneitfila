@@ -15,6 +15,7 @@ node e2e.mjs drag export    # רק בדיקות שהמזהה שלהן מכיל �
 
 - `CHROMIUM_PATH` — נתיב לכרום/כרומיום (ברירת מחדל: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`).
 - `SKIP_PREPARE=1` — לא להריץ את `prepare-assets.sh` (בדיקת הסנכרון תיכשל במקרה זה).
+- `QA_PAGE=<נתיב>` — להריץ מול קובץ HTML אחר, למשל גרסה קודמת לבקרה (צריך לצדו `vendor/` ו‑`fonts.css`).
 
 כל בדיקה רצה בהקשר דפדפן חדש עם `localStorage` ריק. לכל בדיקה מודפסת שורת
 PASS / WARN / FAIL עם סיבה קצרה, ובסוף סיכום. קוד היציאה שונה מאפס אם בדיקה כלשהי נכשלה.
