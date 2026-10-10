@@ -1,9 +1,12 @@
 package com.zmaneitfila.yechezkel;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -24,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** הגשר בין העמוד לאנדרואיד: שיתוף התמונה, שמירתה בגלריה ושיתוף קובץ הגיבוי. */
 public class AppBridge {
@@ -50,29 +54,61 @@ public class AppBridge {
         });
     }
 
-    /** שמירת התמונה בגלריה. מחזיר false כשהשמירה אינה אפשרית, ואז העמוד יציע שיתוף. */
+    /** שמירת התמונה במכשיר. מחזיר false כשהשמירה אינה אפשרית, ואז העמוד יציע שיתוף. */
     @JavascriptInterface
     public boolean saveImage(final String dataUrl, final String name) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return false;
         try {
             byte[] png = decode(dataUrl);
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.Images.Media.DISPLAY_NAME, safeName(name, ".png"));
-            values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
-            values.put(MediaStore.Images.Media.RELATIVE_PATH,
-                    Environment.DIRECTORY_PICTURES + "/זמני תפילה");
-            Uri uri = act.getContentResolver()
-                    .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-            if (uri == null) return false;
-            try (OutputStream out = act.getContentResolver().openOutputStream(uri)) {
-                if (out == null) return false;
-                out.write(png);
+            String fileName = safeName(name, ".png");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (!saveToGallery(png, fileName)) return false;
+                act.runOnUiThread(() -> toast("התמונה נשמרה בגלריה"));
+                return true;
             }
-            act.runOnUiThread(() -> toast("התמונה נשמרה בגלריה"));
-            return true;
+            return saveToAppPictures(png, fileName);
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /** אנדרואיד 10 ומעלה: לתיקייה Pictures/זמני תפילה דרך MediaStore, בלי שום הרשאה. */
+    @TargetApi(Build.VERSION_CODES.Q)
+    private boolean saveToGallery(byte[] png, String fileName) {
+        ContentResolver cr = act.getContentResolver();
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH,
+                Environment.DIRECTORY_PICTURES + "/זמני תפילה");
+        values.put(MediaStore.Images.Media.IS_PENDING, 1);   /* מוסתרת עד שהכתיבה מסתיימת */
+        Uri uri = cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        if (uri == null) return false;
+        try (OutputStream out = cr.openOutputStream(uri)) {
+            if (out == null) throw new Exception("no output stream");
+            out.write(png);
+        } catch (Exception e) {
+            cr.delete(uri, null, null);                       /* לא משאירים בגלריה רשומה ריקה */
+            return false;
+        }
+        ContentValues ready = new ContentValues();
+        ready.put(MediaStore.Images.Media.IS_PENDING, 0);
+        cr.update(uri, ready, null, null);
+        return true;
+    }
+
+    /** אנדרואיד 8–9: RELATIVE_PATH אינו קיים שם, וכתיבה לתיקייה ציבורית מחייבת הרשאת
+     *  אחסון שהאפליקציה אינה מבקשת. לכן שומרים בתיקיית התמונות של האפליקציה, שאינה
+     *  דורשת הרשאה, ומבקשים מסורק המדיה לרשום את הקובץ כדי שיופיע בגלריה. */
+    private boolean saveToAppPictures(byte[] png, String fileName) throws Exception {
+        File base = act.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (base == null) return false;                       /* אחסון חיצוני אינו זמין */
+        File dir = new File(base, "זמני תפילה");
+        if (!dir.exists() && !dir.mkdirs()) return false;
+        File file = new File(dir, fileName);
+        try (FileOutputStream out = new FileOutputStream(file)) { out.write(png); }
+        MediaScannerConnection.scanFile(act, new String[] { file.getAbsolutePath() },
+                new String[] { "image/png" }, null);
+        return true;
     }
 
     /** שיתוף קובץ הגיבוי של ההגדרות. */
@@ -125,9 +161,10 @@ public class AppBridge {
                     }
                 }
                 if (version.isEmpty() || url.isEmpty()) { report("error", "", 0, quiet); return; }
-                report(isNewer(version) ? "available" : "latest", version, 0, quiet);
+                /* נשמר לפני הדיווח, כדי שלחיצה מהירה על "עדכן עכשיו" תמצא את הכתובת */
                 pendingUrl = url;
                 pendingVersion = version;
+                report(isNewer(version) ? "available" : "latest", version, 0, quiet);
             } catch (Exception e) {
                 report("error", "", 0, quiet);
             }
@@ -139,6 +176,8 @@ public class AppBridge {
     public void installUpdate() {
         final String url = pendingUrl, version = pendingVersion;
         if (url == null || url.isEmpty()) return;
+        /* הורדה אחת בכל פעם: שתי הורדות במקביל כותבות לאותו קובץ ומוחקות זו לזו */
+        if (!downloading.compareAndSet(false, true)) return;
         new Thread(() -> {
             try {
                 File dir = new File(act.getCacheDir(), "updates");
@@ -161,6 +200,8 @@ public class AppBridge {
                         int pct = total > 0 ? (int) (100L * done / total) : 0;
                         if (pct != lastPct) { lastPct = pct; report("progress", version, pct, false); }
                     }
+                    /* חיבור שנקטע באמצע מסתיים לפעמים בלי שגיאה; קובץ חלקי לא יועבר למתקין */
+                    if (total > 0 && done != total) throw new Exception("incomplete download");
                 }
                 conn.disconnect();
 
@@ -171,11 +212,15 @@ public class AppBridge {
                 act.startActivity(intent);
             } catch (Exception e) {
                 report("error", version, 0, false);
+            } finally {
+                downloading.set(false);
             }
         }).start();
     }
 
-    private String pendingUrl = "", pendingVersion = "";
+    /* נכתבים בתהליכון הבדיקה ונקראים בתהליכון הגשר — volatile כדי שהערך ייראה */
+    private volatile String pendingUrl = "", pendingVersion = "";
+    private final AtomicBoolean downloading = new AtomicBoolean(false);
 
     private boolean isNewer(String remote) {
         try {
