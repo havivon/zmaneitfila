@@ -23,7 +23,8 @@ const ROOT = path.resolve(HERE, '..');
 const OUT = path.join(HERE, 'out');
 const SRC = path.join(ROOT, 'index.html');
 const ASSET = path.join(ROOT, 'android/app/src/main/assets/index.html');
-const PAGE_URL = pathToFileURL(ASSET).href;
+/* QA_PAGE — נתיב לקובץ HTML אחר (למשל גרסה קודמת להשוואה); ברירת מחדל: קובץ ה-assets */
+const PAGE_URL = pathToFileURL(process.env.QA_PAGE ? path.resolve(process.env.QA_PAGE) : ASSET).href;
 const CHROMIUM = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 const QA_LIB = fs.readFileSync(path.join(HERE, 'qa-lib.js'), 'utf8');
 const STORE = 'zmanei-tfila-yechezkel-v2';
@@ -64,7 +65,7 @@ async function open(o = {}) {
     hasTouch: mobile || !!o.touch,
     acceptDownloads: true,
     locale: 'he-IL',
-    timezoneId: 'Asia/Jerusalem'
+    timezoneId: o.tz || 'Asia/Jerusalem'
   });
   cur.contexts.push(ctx);
   /* כלל 3: אסור שום משאב חיצוני. כל בקשת רשת נחסמת ונרשמת. */
@@ -148,7 +149,7 @@ async function exportCanvas(page) {
     const c = await __qa.app().renderCanvas();
     window.__qaCanvas = c;
     const p = document.getElementById('poster');
-    return { w: c.width, h: c.height, ms: Math.round(performance.now() - t0), pw: p.offsetWidth, ph: p.offsetHeight };
+    return { w: c.width, h: c.height, ms: Math.round(performance.now() - t0), pw: p.offsetWidth, ph: parseFloat(getComputedStyle(p).height) };
   });
 }
 async function saveCanvas(page, name) {
@@ -294,7 +295,7 @@ test('export.basic', 'ייצוא: 1080 ברוחב, גבוה כמסך טלפון,
   const file = await saveCanvas(page, 'export-default.png');
   check(e.w === 1080, 'רוחב הייצוא ' + e.w + ' (צריך 1080)');
   check(e.h >= e.w * 1.7, `הייצוא נמוך מדי למסך טלפון: ${e.w}×${e.h} (יחס ${r1(e.h / e.w)})`);
-  check(e.h === Math.round(e.ph * 1.5), `גובה הייצוא ${e.h} אינו גובה הלוח ×1.5 (${e.ph * 1.5}) — הלוח נחתך או נמתח`);
+  check(Math.abs(e.h - e.ph * 1.5) <= 1, `גובה הייצוא ${e.h} אינו גובה הלוח ×1.5 (${e.ph * 1.5}) — הלוח נחתך או נמתח`);
   check(e.ms < 8000, 'הייצוא איטי מדי: ' + e.ms + ' ms');
   const st = await app(page, () => {
     const c = window.__qaCanvas, img = __qa.canvasData(c), poster = document.getElementById('poster');
@@ -328,7 +329,7 @@ test('export.tall-content', 'ייצוא עם תוכן רב: הלוח גדל וה
   await settle(600);
   const e = await exportCanvas(page);
   const file = await saveCanvas(page, 'export-tall.png');
-  check(e.h === Math.round(e.ph * 1.5), `גובה הייצוא ${e.h} ≠ גובה הלוח ×1.5 (${e.ph * 1.5})`);
+  check(Math.abs(e.h - e.ph * 1.5) <= 1, `גובה הייצוא ${e.h} ≠ גובה הלוח ×1.5 (${e.ph * 1.5})`);
   const st = await app(page, () => {
     const img = __qa.canvasData(window.__qaCanvas);
     const a = document.querySelector('#poster .p-addr'), r = __qa.relRect(a);
@@ -441,7 +442,9 @@ test('export.ornaments', 'נאמנות הייצוא: כל העיטורים (מג
       if (mode === 'leftStrip') r = { x: 0, y: 300, w: 30, h: 800 };
       if (mode === 'archTop') r = { x: r.x, y: r.y, w: r.w, h: 200 };
       if (mode === 'bottomEdge') r = { x: r.x, y: r.y + r.h - 3, w: r.w, h: 6 };
-      return { x: Math.floor(r.x - 3), y: Math.floor(r.y - 3), w: Math.ceil(r.w + 6), h: Math.ceil(r.h + 6) };
+      /* קו דק מ-2.5px: ההחלקה (anti-aliasing) מפזרת אותו אחרת בין שורות הפיקסלים */
+      const thin = !mode && el.getBoundingClientRect().height < 2.5;
+      return { x: Math.floor(r.x - 3), y: Math.floor(r.y - 3), w: Math.ceil(r.w + 6), h: Math.ceil(r.h + 6), thin };
     }, [sel, mode]);
     if (!rect) { res.push({ name, err: 'לא נמצא בלוח' }); continue; }
     const id = await page.addStyleTag({ content: css || ('#poster ' + sel + '{visibility:hidden!important}') });
@@ -457,7 +460,16 @@ test('export.ornaments', 'נאמנות הייצוא: כל העיטורים (מג
          בתת-פיקסל נתנו בסבולת ±1 תוצאה לא יציבה: 50% או 100% לסירוגין). */
       const tries = [0, 1, 2].map(R => ({ R, ...__qa.presence(a, b, e, 40, R), control: __qa.presence(a, b, b, 40, R).score }));
       const ok = tries.find(t => t.score >= 0.75 && t.control <= 0.2);
-      return { ...(ok || tries[0]), valid: tries.some(t => t.control <= 0.2), png: __qa.side([a, e], 2) };
+      /* בקו דק משווים את כמות הדיו בעמודה (סכום על פני גובה הקו) בשש נקודות לאורכו:
+         הקו קיים ובאותו פרופיל דהייה, גם אם ההחלקה פיזרה אותו אחרת בין השורות */
+      let along = null;
+      if (r.thin) {
+        const bg = __qa.bgOf(b);
+        const col = (I, f) => { const x = Math.round(f * (I.w - 1)); let s = 0; for (let y = 0; y < I.h; y++) { const i = (y * I.w + x) * 4; s += Math.abs(I.data[i] - bg[0]) + Math.abs(I.data[i + 1] - bg[1]) + Math.abs(I.data[i + 2] - bg[2]); } return s; };
+        const fs_ = [0.05, 0.15, 0.3, 0.5, 0.7, 0.9];
+        along = fs_.map(f => ({ live: col(a, f), exp: col(e, f), without: col(b, f) }));
+      }
+      return { ...(ok || tries[0]), valid: tries.some(t => t.control <= 0.2), along, png: __qa.side([a, e], 2) };
     }, [B, rect]);
     const idx = res.length;
     m.file = saveDataUrl(m.png, `ornament-${String(idx).padStart(2, '0')}.png`); delete m.png;
@@ -468,12 +480,69 @@ test('export.ornaments', 'נאמנות הייצוא: כל העיטורים (מג
     if (r.err) { bad.push(r.name + ': ' + r.err); continue; }
     if (r.mask < 30) { bad.push(`${r.name}: הקישוט כמעט אינו נראה בלוח החי (${r.mask} פיקסלים — בדיקה לא תקפה)`); continue; }
     if (!r.valid) { bad.push(`${r.name}: המדד אינו מבחין בקישוט חסר (ביקורת ${r1(r.control)}) — בדיקה לא תקפה`); continue; }
+    /* קו דק: בכל נקודה שבה הקו נראה בלוח החי, יש בייצוא לפחות 30% מכמות הדיו (ולא פי 3 יותר).
+       זו בדיקת נוכחות ופרופיל דהייה, לא של עובי: עוצמת קווי 1.5px בייצוא משתנה בין טעינות
+       (40%–80% מהחי) בגלל ייצוא לא דטרמיניסטי — ראו export.deterministic. */
+    if (r.along) {
+      const pts = r.along.filter(p => p.live - p.without > 60);
+      r.alongRatios = pts.map(p => r1((p.exp - p.without) / (p.live - p.without)));
+      const off = r.alongRatios.filter(q => q < 0.3 || q > 3);
+      if (pts.length >= 2 && off.length === 0) { r.by = 'ink-along-line'; continue; }
+      bad.push(`${r.name}: קו דק — יחסי דיו ייצוא/חי לאורך הקו ${r.alongRatios.join(',')} (חי | ייצוא: ${r.file})`);
+      continue;
+    }
     /* רוב פיקסלי הקישוט צריכים להופיע גם בתמונה המיוצאת */
     if (r.score < 0.75) bad.push(`${r.name}: רק ${Math.round(r.score * 100)}% מפיקסלי הקישוט מופיעים בייצוא (חי | ייצוא: ${r.file})`);
   }
   fs.writeFileSync(path.join(OUT, 'fidelity.json'), JSON.stringify({ whole: { mean: whole.mean, frac: whole.frac }, items: res }, null, 1));
   check(bad.length === 0, bad.join('; ') + ` | הפרש כללי ${r1(whole.mean)} → ${diffFile}`);
-  return `${res.length} רכיבים, נוכחות מזערית ${Math.round(Math.min(...res.map(r => r.score)) * 100)}%, הפרש כללי ${r1(whole.mean)} (${r1(whole.frac * 100)}% פיקסלים) → ${diffFile}`;
+  return `${res.length} רכיבים, נוכחות מזערית ${Math.round(Math.min(...res.filter(r => !r.along).map(r => r.score)) * 100)}% (קווים דקים: יחס דיו ${Math.min(...res.filter(r => r.alongRatios).flatMap(r => r.alongRatios))}–${Math.max(...res.filter(r => r.alongRatios).flatMap(r => r.alongRatios))}), הפרש כללי ${r1(whole.mean)} (${r1(whole.frac * 100)}% פיקסלים) → ${diffFile}`;
+});
+
+test('export.deterministic', 'הייצוא דטרמיניסטי: אותם נתונים נותנים אותה תמונה בכל פעם', ['R7'], async () => {
+  const page = await open({ dpr: 1 });
+  await sleep(2000);
+  const r = await app(page, async () => {
+    const out = []; let first = null;
+    for (let k = 0; k < 5; k++) {
+      const I = __qa.canvasData(await __qa.app().renderCanvas());
+      if (!first) first = I;
+      out.push(__qa.diff(first, I, 30));
+      await new Promise(res => setTimeout(res, 150 + 170 * k));
+    }
+    return out.map(d => ({ mean: Math.round(d.mean * 1000) / 1000, frac: Math.round(d.frac * 100000) / 1000 }));
+  });
+  const diffs = r.slice(1).filter(d => d.mean > 0);
+  check(diffs.length === 0, `מתוך 5 ייצואים רצופים ${diffs.length} שונים מהראשון (הפרש ממוצע עד ${Math.max(...r.map(d => d.mean))}, עד ${Math.max(...r.map(d => d.frac))}% מהפיקסלים) — ` +
+    'חשד: html2canvas משכפל את המסמך ואנימציית ‎.fade-up‎ של ‎.stage-wrap‎ מתחילה מחדש בעותק, כך שהלוח מצויר בהיסט תת-פיקסלי משתנה');
+  return '5 ייצואים זהים';
+});
+
+test('export.divider-ends', 'נאמנות הייצוא: אין נקודת זהב תועה בקצה הדוהה של קווי המפריד', ['R1', 'R7'], async () => {
+  const page = await open({ dpr: 1.5 });
+  await setData(page, { notes: 'הודעה לבדיקה', layout: 'list' });
+  await settle(500);
+  await exportCanvas(page);
+  const res = await app(page, () => {
+    const E = __qa.canvasData(window.__qaCanvas), out = [];
+    for (const el of document.querySelectorAll('#poster .p-card-head i, #poster .p-notes-head i, #poster .p-sub i')) {
+      if (!el.getClientRects().length) continue;
+      const r = __qa.relRect(el);
+      /* חיתוך של 8px בכל קצה, ועוד 3px מעל ומתחת; הקצה הדוהה הוא זה שבו בגרדיאנט יש פחות זהב */
+      const end = (x) => __qa.crop(E, x * 1.5, (r.y - 3) * 1.5, 8 * 1.5, (r.h + 6) * 1.5);
+      const L = end(r.x), R = end(r.x + r.w - 8);
+      const peak = (I) => { const bg = __qa.bgOf(I); let m = 0; for (let i = 0; i < I.data.length; i += 4) m = Math.max(m, Math.abs(I.data[i] - bg[0]) + Math.abs(I.data[i + 1] - bg[1]) + Math.abs(I.data[i + 2] - bg[2])); return m; };
+      const cs = getComputedStyle(el).backgroundImage;
+      /* "to right" — חזק משמאל, דוהה לימין; "to left" — להפך. html2canvas נותן ממוצע אחר, לכן לוקחים את החלש */
+      const pl = peak(L), pr = peak(R);
+      out.push({ cls: el.parentElement.className + (el.classList.contains('flip') ? ' flip' : ''), faded: Math.min(pl, pr), strong: Math.max(pl, pr), bg: cs.slice(0, 40) });
+    }
+    return out;
+  });
+  check(res.length >= 4, 'לא נמצאו קווי מפריד');
+  const bad = res.filter(x => x.faded > 90);
+  check(bad.length === 0, 'נקודה בקצה הדוהה של קו: ' + bad.map(x => `${x.cls} (שיא ${x.faded})`).join('; '));
+  return `${res.length} קווים, שיא בקצה הדוהה ≤ ${Math.max(...res.map(x => x.faded))} (סף 90)`;
 });
 
 test('export.themes-layouts', 'כל 5 ערכות הצבע × 2 פריסות: מוצגות ומיוצאות בלי שגיאות', ['AGENTS:בדיקה', 'R6'], async () => {
@@ -627,6 +696,20 @@ test('poster.label-size', 'שם התפילה גדול ובולט כמו השעה
   return desc.join(' | ');
 });
 
+test('poster.meta-line', 'שורת הפרשה והתאריך: שני ערכים זהים מוצגים שניהם, ועריכה מתעדכנת מיד', ['R20'], async () => {
+  const page = await open();
+  await setData(page, { parasha: 'שבת חנוכה', hdate: 'שבת חנוכה' });
+  await settle(300);
+  const a = await app(page, () => [...document.querySelectorAll('#poster .p-meta > span')].map(s => s.innerText.trim()));
+  check(a.length === 2 && a.every(x => x.includes('שבת חנוכה')), 'ערכים זהים: ' + JSON.stringify(a));
+  await setData(page, { hdate: '' });
+  await settle(300);
+  const b = await app(page, () => ({ n: document.querySelectorAll('#poster .p-meta > span').length, sep: [...document.querySelectorAll('#poster .p-meta b')].filter(x => x.offsetParent).length }));
+  check(b.n === 1 && b.sep === 0, 'אחרי מחיקת התאריך: ' + JSON.stringify(b));
+  const errs = cur.errors.length;
+  check(errs === 0, 'שגיאות Alpine');
+});
+
 test('poster.notes-below', 'אזור ההודעות מופיע בלוח מתחת לכל הזמנים', ['R5'], async () => {
   const page = await open();
   const empty = await app(page, () => document.querySelector('#poster .p-notes').offsetParent === null);
@@ -766,11 +849,11 @@ test('preview.dimensions', 'תמונת התצוגה המקדימה זהה בממ
       const C = __qa.canvasData(c);
       const p = document.getElementById('poster');
       const same = P.w === C.w && P.h === C.h;
-      return { nat: [im.naturalWidth, im.naturalHeight], canvas: [c.width, c.height], poster: [p.offsetWidth * 1.5, p.offsetHeight * 1.5], diff: same ? __qa.diff(P, C).mean : null };
+      return { nat: [im.naturalWidth, im.naturalHeight], canvas: [c.width, c.height], poster: [p.offsetWidth * 1.5, parseFloat(getComputedStyle(p).height) * 1.5], diff: same ? __qa.diff(P, C).mean : null };
     });
     report.push(`${label}: תצוגה ${r.nat.join('×')}, קנבס ${r.canvas.join('×')}, לוח×1.5 ${r.poster.join('×')}` + (r.diff !== null ? `, הפרש ${r1(r.diff)}` : ''));
     check(r.nat[0] === r.canvas[0] && r.nat[1] === r.canvas[1], 'ממדי התצוגה שונים מהקנבס — ' + report.join(' | '));
-    check(r.canvas[1] === r.poster[1], 'הקנבס אינו בגובה הלוח — ' + report.join(' | '));
+    check(Math.abs(r.canvas[1] - r.poster[1]) <= 1, 'הקנבס אינו בגובה הלוח — ' + report.join(' | '));
     check(r.diff < 1, 'תוכן התצוגה שונה מהקנבס הנוכחי (תמונה ישנה?) — ' + report.join(' | '));
     await app(page, () => __qa.app().closePreview());
     await settle(200);
@@ -960,6 +1043,37 @@ test('drag.quick-swipe', 'החלקה מהירה (גלילה) על שורה אי�
   check(!(await app(page, () => !!document.querySelector('.item.dragging'))), 'שורה נשארה במצב גרירה');
 });
 
+test('drag.two-finger', 'אצבע שנייה באמצע גרירה: הגרירה מסתיימת נקי — אין שורה תקועה, והמסך ממשיך להגיב', ['R13'], async () => {
+  const page = await open({ mobile: true });
+  const grp = page.locator('.group').nth(1);
+  await grp.locator('.item').nth(2).scrollIntoViewIfNeeded();
+  const a = await center(grp.locator('.item').nth(0).locator('.item-line input'));
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: a.x, y: a.y, id: 1 }] });
+  await sleep(450);
+  for (let i = 1; i <= 5; i++) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: a.x, y: a.y + 10 * i, id: 1 }] }); await sleep(16); }
+  const mid = await app(page, () => !!document.querySelector('.item.dragging'));
+  /* אצבע שנייה נוגעת, שתיהן זזות, ואז שתיהן מורמות */
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: a.x, y: a.y + 50, id: 1 }, { x: a.x - 120, y: a.y + 200, id: 2 }] });
+  for (let i = 1; i <= 5; i++) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: a.x, y: a.y + 50 + 10 * i, id: 1 }, { x: a.x - 120, y: a.y + 200 - 20 * i, id: 2 }] }); await sleep(16); }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [{ x: a.x - 120, y: a.y + 100, id: 2 }] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await cdp.detach();
+  await settle(700);
+  const st = await app(page, () => ({
+    dragging: document.querySelectorAll('.item.dragging').length, list: document.querySelectorAll('.dragging-list').length,
+    noSelect: document.body.classList.contains('no-select'),
+    transforms: [...document.querySelectorAll('.item')].filter(r => r.style.transform).length,
+    n: __qa.app().d.sections[1].items.length
+  }));
+  check(mid, 'הגרירה לא התחילה (בדיקה לא תקפה)');
+  check(st.dragging === 0 && st.list === 0 && !st.noSelect && st.transforms === 0, 'שורה נשארה תקועה: ' + JSON.stringify(st));
+  check(st.n === 5, 'מספר השורות השתנה: ' + st.n);
+  /* המסך ממשיך להגיב */
+  await tapEl(page, grp.locator('.item').nth(3).locator('button.inp-time')); await settle(400);
+  check(await app(page, () => __qa.app().tp.open), 'הקשה אחרי הגרירה לא פתחה את הבורר');
+});
+
 test('drag.mouse', 'גרירה בעכבר (מחשב): לחיצה ארוכה על שם התפילה וגרירה משנה את הסדר', ['R13'], async () => {
   const page = await open({ viewport: { width: 1400, height: 1100 } });
   const grp = page.locator('.group').nth(1);
@@ -1116,28 +1230,67 @@ test('hebcal.parasha', 'פרשה ותאריך עברי (מנהג ארץ ישרא
   return cases.length + ' תאריכים; שנת תשפ"ו שלמה';
 });
 
-test('hebcal.autofill', 'מילוי אוטומטי של פרשה ותאריך לשבת הקרובה, בלי רשת', ['R20'], async () => {
+test('hebcal.autofill', 'מילוי אוטומטי לשבת הקרובה, בלי רשת: א׳–ה׳ → השבת הקרובה, שישי → מחר, שבת (כל שעה) → השבת הבאה', ['R20'], async () => {
   const out = [];
-  for (const [now, par, hd] of [['2026-10-14T10:00:00+03:00', 'פרשת נח', 'ו׳ בחשוון תשפ״ז'], ['2026-10-10T09:00:00+03:00', 'פרשת בראשית', 'כ״ט בתשרי תשפ״ז'], ['2026-09-22T10:00:00+03:00', 'סוכות', 'ט״ו בתשרי תשפ״ז']]) {
-    const page = await open({ clock: new Date(now) });
+  for (const [now, par, hd, tz] of [
+    ['2026-10-14T10:00:00+03:00', 'פרשת נח', 'ו׳ בחשוון תשפ״ז'],              /* רביעי */
+    ['2026-10-09T10:00:00+03:00', 'פרשת בראשית', 'כ״ט בתשרי תשפ״ז'],          /* שישי → מחר */
+    ['2026-10-10T09:00:00+03:00', 'פרשת נח', 'ו׳ בחשוון תשפ״ז'],              /* שבת בבוקר → השבת הבאה */
+    ['2026-10-10T21:30:00+03:00', 'פרשת נח', 'ו׳ בחשוון תשפ״ז'],              /* מוצאי שבת */
+    ['2026-09-22T10:00:00+03:00', 'סוכות', 'ט״ו בתשרי תשפ״ז'],                /* שבת שחלה בחג — בלי "פרשת" */
+    ['2026-10-14T10:00:00+13:00', 'פרשת נח', 'ו׳ בחשוון תשפ״ז', 'Pacific/Auckland'],      /* אזור זמן מעל UTC+12 */
+    ['2026-10-09T23:30:00-07:00', 'פרשת בראשית', 'כ״ט בתשרי תשפ״ז', 'America/Los_Angeles'] /* שישי בלילה, מערבית ל-UTC */
+  ]) {
+    const page = await open({ clock: new Date(now), tz });
     const d = await app(page, () => ({ p: __qa.app().d.parasha, h: __qa.app().d.hdate, meta: document.querySelector('#poster .p-meta').innerText }));
-    check(d.p === par && d.h === hd, `${now}: צפוי ${par} / ${hd}, התקבל ${d.p} / ${d.h}`);
+    check(d.p === par && d.h === hd, `${now}${tz ? ' ' + tz : ''}: צפוי ${par} / ${hd}, התקבל ${d.p} / ${d.h}`);
     check(d.meta.includes(hd), 'התאריך אינו מוצג בלוח');
-    out.push(`${now.slice(0, 10)} → ${d.p}`);
+    out.push(`${now.slice(0, 16)}${tz ? ' ' + tz.split('/')[1] : ''} → ${d.p}`);
   }
-  /* כפתור "עדכן לשבת הקרובה" */
+  /* ערך שמור אינו נדרס בטעינה; כפתור "עדכן לשבת הקרובה" מעדכן אותו */
   const page = await open({ clock: new Date('2026-10-14T10:00:00+03:00'), seed: { parasha: 'פרשת וירא', hdate: 'ישן' } });
+  check(await app(page, () => __qa.app().d.parasha) === 'פרשת וירא', 'ערך שמור נדרס בטעינה');
   await page.locator('.tab', { hasText: 'כותרת ופרטים' }).click();
   await page.locator('button', { hasText: 'עדכן לשבת הקרובה' }).click();
   await settle(200);
   const d = await app(page, () => [__qa.app().d.parasha, __qa.app().d.hdate]);
   check(d[0] === 'פרשת נח' && d[1] === 'ו׳ בחשוון תשפ״ז', 'הכפתור עדכן ל: ' + d.join(' / '));
   check(cur.requests.length === 0, 'בקשות רשת: ' + cur.requests.join(','));
-  /* מוצאי שבת: הגבאי מכין את לוח השבוע הבא */
-  const ms = await open({ clock: new Date('2026-10-10T21:30:00+03:00') });
-  const p2 = await app(ms, () => __qa.app().d.parasha);
-  if (p2 !== 'פרשת נח') warn(out.join(', ') + ` | במוצאי שבת (10.10 21:30) המילוי האוטומטי נותן "${p2}" — השבת שכבר יצאה, לא "פרשת נח"`);
   return out.join(', ');
+});
+
+test('photo.upload', 'העלאת תמונה משלך: מוצגת בלוח ובתמונה המיוצאת, נשמרת, וחזרה לברירת המחדל עובדת', ['R2', 'R21'], async () => {
+  const page = await open({ dpr: 1 });
+  /* תמונת בדיקה: אדום למעלה, ירוק למטה, 600×800 — נוצרת בדפדפן */
+  const png = await app(page, () => { const c = document.createElement('canvas'); c.width = 600; c.height = 800; const g = c.getContext('2d'); g.fillStyle = '#d01010'; g.fillRect(0, 0, 600, 400); g.fillStyle = '#10a020'; g.fillRect(0, 400, 600, 400); return c.toDataURL('image/png'); });
+  const f = path.join(OUT, 'upload-test.png');
+  fs.writeFileSync(f, Buffer.from(png.split(',')[1], 'base64'));
+  await page.locator('.tab', { hasText: 'עיצוב ותמונה' }).click();
+  const [fc] = await Promise.all([page.waitForEvent('filechooser'), page.locator('button', { hasText: 'העלה תמונה משלך' }).click()]);
+  await fc.setFiles(f);
+  await page.waitForFunction(() => !!__qa.app().d.photo, null, { timeout: 8000 }).catch(() => {});
+  const st = await app(page, () => ({ photo: (__qa.app().d.photo || '').slice(0, 30), len: (__qa.app().d.photo || '').length, bg: getComputedStyle(document.querySelector('#poster .p-portrait')).backgroundImage.slice(0, 40) }));
+  check(st.photo.startsWith('data:image/'), 'התמונה לא נטענה לנתונים: ' + JSON.stringify(st));
+  check(st.bg.includes('data:image/'), 'הלוח אינו מציג את התמונה החדשה');
+  /* בייצוא: החלק העליון של הדיוקן אדום והתחתון ירוק */
+  await exportCanvas(page);
+  const file = await saveCanvas(page, 'photo-upload-export.png');
+  const px = await app(page, () => { const r = __qa.relRect(document.querySelector('#poster .p-portrait')); const I = __qa.canvasData(window.__qaCanvas); return [__qa.px(I, (r.x + r.w / 2) * 1.5, (r.y + r.h * 0.3) * 1.5), __qa.px(I, (r.x + r.w / 2) * 1.5, (r.y + r.h * 0.8) * 1.5)]; });
+  check(px[0][0] > 150 && px[0][1] < 80 && px[1][1] > 120 && px[1][0] < 80, 'התמונה המיוצאת אינה מציגה את התמונה שהועלתה: ' + JSON.stringify(px) + ' → ' + file);
+  await settle(500);
+  await load(page, true);
+  check(await app(page, () => (__qa.app().d.photo || '').startsWith('data:image/')), 'התמונה לא נשמרה אחרי טעינה מחדש');
+  await page.locator('.tab', { hasText: 'עיצוב ותמונה' }).click();
+  await page.locator('button', { hasText: 'חזרה לתמונת ברירת המחדל' }).click();
+  await settle(200);
+  check(await app(page, () => __qa.app().d.photo === null), 'החזרה לברירת המחדל לא עבדה');
+  /* קובץ שאינו תמונה נדחה בלי שגיאה */
+  const txt = path.join(OUT, 'not-image.txt'); fs.writeFileSync(txt, 'hello');
+  const [fc2] = await Promise.all([page.waitForEvent('filechooser'), page.locator('button', { hasText: 'העלה תמונה משלך' }).click()]);
+  await fc2.setFiles(txt);
+  await settle(500);
+  check(await app(page, () => __qa.app().d.photo === null), 'קובץ טקסט התקבל כתמונה');
+  return `נשמר כ-data URI (${Math.round(st.len / 1024)}KB)`;
 });
 
 /* ---------- שמירה ---------- */
@@ -1207,12 +1360,12 @@ test('share.android', 'אנדרואיד: שיתוף שולח PNG בלבד בלי
   const sh = await app(page, async () => {
     const c = window.__qaBridge.filter(c => c.fn === 'shareImage');
     const I = await __qa.imgData(c[0].d);
-    return { count: c.length, prefix: c[0].d.slice(0, 22), text: c[0].t, w: I.w, h: I.h, poster: document.getElementById('poster').offsetHeight * 1.5 };
+    return { count: c.length, prefix: c[0].d.slice(0, 22), text: c[0].t, w: I.w, h: I.h, poster: parseFloat(getComputedStyle(document.getElementById('poster')).height) * 1.5 };
   });
   check(sh.count === 1, 'shareImage נקרא ' + sh.count + ' פעמים');
   check(sh.prefix === 'data:image/png;base64,', 'לא PNG: ' + sh.prefix);
   check(sh.text === '' || sh.text === undefined || sh.text === null, 'נשלח טקסט עם התמונה: "' + sh.text + '"');
-  check(sh.w === 1080 && sh.h === sh.poster, `ממדי התמונה המשותפת ${sh.w}×${sh.h} (לוח ×1.5: ${sh.poster})`);
+  check(sh.w === 1080 && Math.abs(sh.h - sh.poster) <= 1, `ממדי התמונה המשותפת ${sh.w}×${sh.h} (לוח ×1.5: ${sh.poster})`);
   await tapEl(page, page.locator('.topbar .btn', { hasText: 'הורדה' }));
   await page.waitForFunction(() => window.__qaBridge.some(c => c.fn === 'saveImage'), null, { timeout: 15000 });
   const sv = await app(page, () => window.__qaBridge.filter(c => c.fn === 'saveImage').map(c => ({ p: c.d.slice(0, 22), n: c.n })));
@@ -1271,6 +1424,8 @@ test('backup.roundtrip', 'גיבוי לקובץ JSON ושחזור ממנו מח�
   check(JSON.stringify(JSON.parse(fs.readFileSync(f, 'utf8'))) === orig, 'קובץ הגיבוי אינו זהה לנתונים');
   await app(page, () => { const d = __qa.app().d; d.synagogue = 'שונה'; d.sections.splice(0, 2); d.theme = 'royal'; });
   await settle(200);
+  const accept = await page.locator('input[type=file][x-ref=json]').getAttribute('accept');
+  check(/\.json/.test(accept || ''), 'בורר הקבצים אינו מקבל סיומת ‎.json‎ (באנדרואיד קבצי JSON מסומנים לעיתים octet-stream): ' + accept);
   const [fc] = await Promise.all([page.waitForEvent('filechooser'), page.locator('button', { hasText: 'שחזור מגיבוי' }).click()]);
   await fc.setFiles(f);
   await page.waitForFunction(() => __qa.app().d.synagogue === 'בית כנסת לגיבוי', null, { timeout: 5000 });
